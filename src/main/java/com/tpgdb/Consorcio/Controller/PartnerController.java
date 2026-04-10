@@ -10,6 +10,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/partner")
+@CrossOrigin("*")
 public class PartnerController {
     final private PartnerService service;
 
