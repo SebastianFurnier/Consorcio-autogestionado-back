@@ -46,4 +46,8 @@ public class PartnerService {
                 }).toList();
 
     }
+
+    public void deleteAll() {
+        repository.deleteAll();
+    }
 }

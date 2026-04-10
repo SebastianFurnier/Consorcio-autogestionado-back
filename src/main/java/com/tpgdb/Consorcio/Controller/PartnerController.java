@@ -28,4 +28,9 @@ public class PartnerController {
     public List<PartnerRequestDto> getAll() {
         return service.getAll();
     }
+
+    @DeleteMapping("/deleteAll")
+    public void deleteAllPartners() {
+        service.deleteAll();
+    }
 }
