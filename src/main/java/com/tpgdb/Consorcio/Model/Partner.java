@@ -1,0 +1,31 @@
+package com.tpgdb.Consorcio.Model;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@NoArgsConstructor
+@Getter
+public class Partner {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String name;
+    private String apartment;
+    private float participation;
+    private String email;
+    private String phone;
+
+    public Partner(String name, String apartment, float participation, String email, String phone) {
+        this.name = name;
+        this.apartment = apartment;
+        this.participation = participation;
+        this.email = email;
+        this.phone = phone;
+    }
+}
