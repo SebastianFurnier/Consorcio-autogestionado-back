@@ -33,4 +33,9 @@ public class PartnerController {
     public void deleteAllPartners() {
         service.deleteAll();
     }
+
+    @PutMapping("/edit")
+    public void editPartner(@RequestBody PartnerRequestDto partnerDto) {
+        service.editPartner(partnerDto);
+    }
 }

@@ -50,4 +50,15 @@ public class PartnerService {
     public void deleteAll() {
         repository.deleteAll();
     }
+
+    public void editPartner(PartnerRequestDto partnerDto) {
+        Partner partner = repository.findById(partnerDto.getId()).orElse(null);
+        partner.setName(partnerDto.getName());
+        partner.setApartment(partnerDto.getApartment());
+        partner.setPhone(partnerDto.getPhone());
+        partner.setEmail(partnerDto.getEmail());
+        partner.setParticipation(partnerDto.getParticipation());
+
+        repository.save(partner);
+    }
 }
