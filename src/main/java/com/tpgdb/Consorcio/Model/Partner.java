@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -22,6 +21,7 @@ public class Partner {
     private float participation;
     private String email;
     private String phone;
+    private boolean active;
 
     public Partner(String name, String apartment, float participation, String email, String phone) {
         this.name = name;
@@ -29,5 +29,6 @@ public class Partner {
         this.participation = participation;
         this.email = email;
         this.phone = phone;
+        active = true;
     }
 }
