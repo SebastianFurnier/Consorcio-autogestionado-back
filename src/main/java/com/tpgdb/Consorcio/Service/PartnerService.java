@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -63,14 +64,17 @@ public class PartnerService {
 
     public void editPartner(PartnerRequestDto partnerDto) {
 
-        validateApartmenInUse(partnerDto);
-
         Partner partner = repository.findById(partnerDto.getId()).orElseThrow(() ->
                 new InvalidPartnerIDException("El id no esta asociado a ningun socio")
         );
 
         partner.setName(partnerDto.getName());
-        partner.setApartment(partnerDto.getApartment());
+
+        if (!Objects.equals(partner.getApartment(), partnerDto.getApartment())) {
+            validateApartmenInUse(partnerDto);
+            partner.setApartment(partnerDto.getApartment());
+        }
+
         partner.setPhone(partnerDto.getPhone());
         partner.setEmail(partnerDto.getEmail());
         partner.setParticipation(partnerDto.getParticipation());
