@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +25,10 @@ public class PartnerService {
         repository.save(partner);
     }
 
-    public void deletePartnerById(Long id) {
+    public boolean deletePartnerById(Long id) {
         repository.deleteById(id);
+        return repository.existsById(id);
+
     }
 
     public List<PartnerRequestDto> getAll() {
