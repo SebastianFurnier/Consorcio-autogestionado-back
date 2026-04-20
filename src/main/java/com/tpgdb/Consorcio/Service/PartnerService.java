@@ -1,19 +1,31 @@
 package com.tpgdb.Consorcio.Service;
 
 import com.tpgdb.Consorcio.Dto.PartnerRequestDto;
+import com.tpgdb.Consorcio.Exception.InvalidDataPartnerException;
+import com.tpgdb.Consorcio.Exception.InvalidPartnerIDException;
 import com.tpgdb.Consorcio.Model.Partner;
 import com.tpgdb.Consorcio.Repository.PartnerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
 public class PartnerService {
     final private PartnerRepository repository;
 
+    private void validateApartmenInUse(PartnerRequestDto partnerDto) {
+        if (repository.existsPartnerByApartmentAndActiveIsTrue(partnerDto.getApartment())) {
+            throw new InvalidDataPartnerException("El departamento esta asociado a otro socio.");
+        }
+    }
+
     public void createNewPartner(PartnerRequestDto partnerDto) {
+
+        validateApartmenInUse(partnerDto);
+
         Partner partner = new Partner(
                 partnerDto.getName(),
                 partnerDto.getApartment(),
@@ -25,37 +37,44 @@ public class PartnerService {
         repository.save(partner);
     }
 
-    public boolean deletePartnerById(Long id) {
-        repository.deleteById(id);
-        return repository.existsById(id);
+    public void deletePartnerById(Long id) {
 
+        Partner partner = repository.findById(id).orElseThrow(() ->
+                new InvalidPartnerIDException("El id no esta asociado a ningun socio")
+        );
+
+        partner.setActive(false);
+
+        repository.save(partner);
     }
 
-    public List<PartnerRequestDto> getAll() {
-        List<Partner> partnerList = repository.findAll();
+    public List<PartnerRequestDto> getAllActivePartners() {
+        List<Partner> partnerList = repository.findAllByActiveIsTrue();
 
         return partnerList.stream()
-                .map(partner -> {
-                    return new PartnerRequestDto(
-                            partner.getId(),
-                            partner.getName(),
-                            partner.getApartment(),
-                            partner.getParticipation(),
-                            partner.getEmail(),
-                            partner.getPhone()
-                    );
-                }).toList();
-
-    }
-
-    public void deleteAll() {
-        repository.deleteAll();
+                .map(partner -> new PartnerRequestDto(
+                        partner.getId(),
+                        partner.getName(),
+                        partner.getApartment(),
+                        partner.getParticipation(),
+                        partner.getEmail(),
+                        partner.getPhone()
+                )).toList();
     }
 
     public void editPartner(PartnerRequestDto partnerDto) {
-        Partner partner = repository.findById(partnerDto.getId()).orElse(null);
+
+        Partner partner = repository.findById(partnerDto.getId()).orElseThrow(() ->
+                new InvalidPartnerIDException("El id no esta asociado a ningun socio")
+        );
+
         partner.setName(partnerDto.getName());
-        partner.setApartment(partnerDto.getApartment());
+
+        if (!Objects.equals(partner.getApartment(), partnerDto.getApartment())) {
+            validateApartmenInUse(partnerDto);
+            partner.setApartment(partnerDto.getApartment());
+        }
+
         partner.setPhone(partnerDto.getPhone());
         partner.setEmail(partnerDto.getEmail());
         partner.setParticipation(partnerDto.getParticipation());

@@ -21,6 +21,7 @@ public class Partner {
     private float participation;
     private String email;
     private String phone;
+    private boolean active;
 
     public Partner(String name, String apartment, float participation, String email, String phone) {
         this.name = name;
@@ -28,5 +29,6 @@ public class Partner {
         this.participation = participation;
         this.email = email;
         this.phone = phone;
+        active = true;
     }
 }
