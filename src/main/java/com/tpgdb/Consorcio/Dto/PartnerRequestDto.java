@@ -1,28 +1,29 @@
 package com.tpgdb.Consorcio.Dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+@NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 public class PartnerRequestDto {
+
     private Long id;
-    @NotBlank(message = "El nombre no debe estar vacio.")
-    private String name;
-    @NotBlank(message = "El numero de departamento no debe estar vacio.")
+
+    @NotNull(message = "El userId es obligatorio")
+    private Long userId;
+
+    @NotNull(message = "El consorcioId es obligatorio")
+    private Long consorcioId;
+
     private String apartment;
-    @NotNull(message = "La participacion es obligatoria.")
-    @Positive(message = "La participacion debe ser mayor a cero.")
     private float participation;
-    @Email(message = "El email no es válido")
-    @NotBlank(message = "El email es obligatorio")
-    private String email;
-    @NotBlank(message = "El teléfono es obligatorio")
-    private String phone;
+
+    @NotBlank(message = "El role es obligatorio")
+    private String role;
 }
