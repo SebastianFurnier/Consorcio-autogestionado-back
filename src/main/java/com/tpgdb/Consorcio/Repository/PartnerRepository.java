@@ -11,14 +11,20 @@ import java.util.Optional;
 
 @Repository
 public interface PartnerRepository extends JpaRepository<Partner, Long> {
-    List<Partner> findAllByActiveIsTrue();
-    
-    List<Partner> findByUserIdAndActiveIsTrue(Long userId);
-    List<Partner> findByConsorcioIdAndActiveIsTrue(Long consortioId);
-    
-    Optional<Partner> findByUserAndConsorcio(User user, Consorcio consorcio);
-    boolean existsByUserAndConsorcio(User user, Consorcio consorcio);
-    
-    boolean existsPartnerByApartmentAndActiveIsTrue(String apartment);
-}
 
+    List<Partner> findAllByActiveIsTrue();
+
+    List<Partner> findByUserIdAndActiveIsTrue(Long userId);
+
+    List<Partner> findByConsorcioIdAndActiveIsTrue(Long consortioId);
+
+    Optional<Partner> findByUserAndConsorcio(User user, Consorcio consorcio);
+
+    boolean existsByUserIdAndConsorcioIdAndActiveIsTrue(Long userId, Long consorcioId);
+
+    Optional<Partner> findByUserIdAndConsorcioIdAndActiveIsTrue(Long userId, Long consorcioId);
+
+    boolean existsByApartmentAndConsorcioIdAndActiveIsTrue(String apartment, Long consorcioId);
+
+    boolean existsByUserAndConsorcio(User user, Consorcio consorcio);
+}

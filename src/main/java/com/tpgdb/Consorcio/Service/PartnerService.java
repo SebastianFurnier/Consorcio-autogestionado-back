@@ -2,7 +2,6 @@ package com.tpgdb.Consorcio.Service;
 
 import com.tpgdb.Consorcio.Dto.PartnerRequestDto;
 import com.tpgdb.Consorcio.Dto.PartnerResponseDto;
-import com.tpgdb.Consorcio.Dto.PartnerResponseDto;
 import com.tpgdb.Consorcio.Exception.InvalidDataPartnerException;
 import com.tpgdb.Consorcio.Exception.InvalidPartnerIDException;
 import com.tpgdb.Consorcio.Model.Partner;
@@ -25,7 +24,6 @@ public class PartnerService {
     private final ConsorcioRepository consorcioRepository;
 
     public void createNewPartner(PartnerRequestDto partnerDto) {
-
         User user = userRepository.findById(partnerDto.getUserId())
                 .orElseThrow(() -> new InvalidDataPartnerException("El usuario no existe"));
 
@@ -52,16 +50,43 @@ public class PartnerService {
         repository.save(partner);
     }
 
-    public void deletePartnerById(Long id) {
-        Partner partner = repository.findById(id)
+    public void deletePartnerById(Long id, Long authenticatedUserId) {
+        Partner partnerToDelete = repository.findById(id)
                 .orElseThrow(() -> new InvalidPartnerIDException("El id no esta asociado a ningun socio"));
 
-        partner.setActive(false);
-        repository.save(partner);
+        Long consorcioId = partnerToDelete.getConsorcio().getId();
+
+        // Buscamos al que está pidiendo borrar
+        Partner authenticatedPartner = repository
+                .findByUserIdAndConsorcioIdAndActiveIsTrue(authenticatedUserId, consorcioId)
+                .orElseThrow(() -> new InvalidDataPartnerException("No perteneces a este consorcio"));
+
+        // Lógica de Permisos:
+        // Se puede borrar si: Es ADMIN
+        boolean isAdmin = authenticatedPartner.getRole() == Partner.PartnerRole.ADMIN;
+        boolean isSelfDelete = partnerToDelete.getUser().getId().equals(authenticatedUserId);
+
+        if (!isAdmin && !isSelfDelete) {
+            throw new InvalidDataPartnerException("No tienes permisos para eliminar a este socio");
+        }
+
+        // Soft Delete del socio
+        partnerToDelete.setActive(false);
+        repository.save(partnerToDelete);
+
+        // Verificamos si quedaron socios activos
+        List<Partner> remainingActivePartners = repository.findByConsorcioIdAndActiveIsTrue(consorcioId);
+
+        // Si no queda nadie, desactivamos el consorcio (Cierre de grupo)
+        if (remainingActivePartners.isEmpty()) {
+            Consorcio consorcio = partnerToDelete.getConsorcio();
+            consorcio.setActive(false);
+            consorcioRepository.save(consorcio);
+        }
     }
 
-    public List<PartnerResponseDto> getAllActivePartners() {
-        return repository.findAllByActiveIsTrue()
+    public List<PartnerResponseDto> getAllActivePartnersByConsorcio(Long consorcioId) {
+        return repository.findByConsorcioIdAndActiveIsTrue(consorcioId)
                 .stream()
                 .map(this::convertToDto)
                 .toList();
