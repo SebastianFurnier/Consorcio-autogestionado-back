@@ -1,6 +1,7 @@
 package com.tpgdb.Consorcio.Controller;
 
 import com.tpgdb.Consorcio.Dto.PartnerRequestDto;
+import com.tpgdb.Consorcio.Dto.PartnerResponseDto;
 //import com.tpgdb.Consorcio.Model.Partner;
 import com.tpgdb.Consorcio.Service.PartnerService;
 import jakarta.validation.Valid;
@@ -33,8 +34,8 @@ public class PartnerController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Map<String, List<PartnerRequestDto>>> getAll() {
-        List<PartnerRequestDto> partnerList = service.getAllActivePartners();
+    public ResponseEntity<Map<String, List<PartnerResponseDto>>> getAll() {
+        List<PartnerResponseDto> partnerList = service.getAllActivePartners();
 
         return ResponseEntity.ok(Map.of("response", partnerList));
     }

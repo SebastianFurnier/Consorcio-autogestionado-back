@@ -72,9 +72,11 @@ public class ConsorcioService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new InvalidConsorcioException("Usuario no encontrado"));
 
-        // Buscar consorcio por código de invitación (sin guion)
-        String codigoSinGuion = requestDto.getCodigoInvitacion().replace("-", "");
-        Consorcio consorcio = consortioRepository.findByCodigoInvitacion(requestDto.getCodigoInvitacion())
+        // Limpiar y formatear el código recibido para buscar
+        String codigoFormateado = formatCode(requestDto.getCodigoInvitacion().replace("-", "").toUpperCase());
+
+        // Buscar consorcio por código de invitación formateado
+        Consorcio consorcio = consortioRepository.findByCodigoInvitacion(codigoFormateado)
                 .orElseThrow(() -> new InvalidConsorcioException("Código de invitación inválido"));
 
         // Validar que el usuario no pertenezca ya al consorcio
@@ -104,6 +106,27 @@ public class ConsorcioService {
                     return buildConsorcioResponse(partner.getConsorcio(), partner.getRole(), cantidadMiembros);
                 })
                 .collect(Collectors.toList());
+    }
+
+    public ConsorcioResponseDto obtenerConsorcioById(Long consorcioId, Long userId) {
+        // Obtener consorcio
+        Consorcio consorcio = consortioRepository.findById(consorcioId)
+                .orElseThrow(() -> new InvalidConsorcioException("Consorcio no encontrado"));
+
+        // Obtener usuario
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new InvalidConsorcioException("Usuario no encontrado"));
+
+        // Verificar que el usuario pertenece al consorcio
+        Partner partner = partnerRepository.findByUserAndConsorcio(user, consorcio)
+                .orElseThrow(() -> new InvalidConsorcioException("No tienes acceso a este consorcio"));
+
+        // Obtener cantidad de miembros activos
+        long cantidadMiembros = partnerRepository
+                .findByConsorcioIdAndActiveIsTrue(consorcioId)
+                .size();
+
+        return buildConsorcioResponse(consorcio, partner.getRole(), cantidadMiembros);
     }
 
     private ConsorcioResponseDto buildConsorcioResponse(Consorcio consorcio, Partner.PartnerRole role,

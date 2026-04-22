@@ -18,7 +18,7 @@ import java.util.Map;
 @RequestMapping("/consorcios")
 @CrossOrigin("*")
 public class ConsorcioController {
-    
+
     private final ConsorcioService consortioService;
 
     @PostMapping
@@ -45,5 +45,14 @@ public class ConsorcioController {
         Long userId = (Long) authentication.getPrincipal();
         List<ConsorcioResponseDto> consorcios = consortioService.obtenerMisConsorcios(userId);
         return ResponseEntity.ok(Map.of("consorcios", consorcios));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ConsorcioResponseDto> obtenerConsorcio(
+            @PathVariable Long id,
+            Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        ConsorcioResponseDto consorcio = consortioService.obtenerConsorcioById(id, userId);
+        return ResponseEntity.ok(consorcio);
     }
 }
