@@ -64,7 +64,7 @@ public class PartnerService {
 
     public void editPartner(PartnerRequestDto partnerDto) {
 
-        Partner partner = repository.findById(partnerDto.getId()).orElseThrow(() ->
+        Partner partner = repository.findByIdAndActiveIsTrue(partnerDto.getId()).orElseThrow(() ->
                 new InvalidPartnerIDException("El id no esta asociado a ningun socio")
         );
 

@@ -1,7 +1,6 @@
 package com.tpgdb.Consorcio.Controller;
 
 import com.tpgdb.Consorcio.Dto.PartnerRequestDto;
-import com.tpgdb.Consorcio.Model.Partner;
 import com.tpgdb.Consorcio.Service.PartnerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
