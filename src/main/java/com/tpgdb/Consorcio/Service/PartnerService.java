@@ -106,12 +106,11 @@ public class PartnerService {
 
             if (partner.getRole() == Partner.PartnerRole.ADMIN) {
                 int min_admin_allowed = 1;
-                if (repository.countPartnerByRoleAndConsorcio_Id(
-                        Partner.PartnerRole.ADMIN, consorcio.getId()) == min_admin_allowed){
+                if ((Partner.PartnerRole.MEMBER == partnerDto.getRole()) && (repository.countPartnerByRoleAndConsorcio_Id(
+                        Partner.PartnerRole.ADMIN, consorcio.getId()) == min_admin_allowed)){
                     throw new InvalidDataPartnerException("Debe haber al menos un admin en un consorcio");
                 };
-                partner.setRole(
-                        Partner.PartnerRole.valueOf(partnerDto.getRole().toUpperCase()));
+                partner.setRole(partnerDto.getRole());
             }
         }
 

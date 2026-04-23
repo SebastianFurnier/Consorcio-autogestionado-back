@@ -1,5 +1,6 @@
 package com.tpgdb.Consorcio.Dto.partner;
 
+import com.tpgdb.Consorcio.Model.Partner;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,5 @@ public class PartnerEditRequestDTO {
     private String apartment;
     @Positive
     private float participation;
-    @NotBlank(message = "El role es obligatorio")
-    private String role;
+    private Partner.PartnerRole role;
 }
