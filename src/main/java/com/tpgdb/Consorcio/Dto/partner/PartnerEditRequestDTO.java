@@ -1,7 +1,7 @@
-package com.tpgdb.Consorcio.Dto;
+package com.tpgdb.Consorcio.Dto.partner;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,19 +11,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @Getter
 @Setter
-public class PartnerRequestDto {
-
+public class PartnerEditRequestDTO {
     private Long id;
-
-    @NotNull(message = "El userId es obligatorio")
-    private Long userId;
-
-    @NotNull(message = "El consorcioId es obligatorio")
-    private Long consorcioId;
-
+    @NotBlank
     private String apartment;
+    @Positive
     private float participation;
-
     @NotBlank(message = "El role es obligatorio")
     private String role;
 }

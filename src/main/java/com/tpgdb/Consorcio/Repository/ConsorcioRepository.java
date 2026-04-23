@@ -10,6 +10,5 @@ import java.util.Optional;
 @Repository
 public interface ConsorcioRepository extends JpaRepository<Consorcio, Long> {
     Optional<Consorcio> findByCodigoInvitacion(String codigoInvitacion);
-    List<Consorcio> findAllByActiveIsTrue();
     boolean existsByCodigoInvitacion(String codigoInvitacion);
 }

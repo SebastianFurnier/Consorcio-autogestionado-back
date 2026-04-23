@@ -1,7 +1,8 @@
 package com.tpgdb.Consorcio.Service;
 
-import com.tpgdb.Consorcio.Dto.PartnerRequestDto;
-import com.tpgdb.Consorcio.Dto.PartnerResponseDto;
+import com.tpgdb.Consorcio.Dto.partner.PartnerEditRequestDTO;
+import com.tpgdb.Consorcio.Dto.partner.PartnerRequestDto;
+import com.tpgdb.Consorcio.Dto.partner.PartnerResponseDto;
 import com.tpgdb.Consorcio.Exception.InvalidDataPartnerException;
 import com.tpgdb.Consorcio.Exception.InvalidPartnerIDException;
 import com.tpgdb.Consorcio.Model.Partner;
@@ -92,21 +93,26 @@ public class PartnerService {
                 .toList();
     }
 
-    public void editPartner(PartnerRequestDto partnerDto) {
+    public void editPartner(PartnerEditRequestDTO partnerDto) {
         Partner partner = repository.findById(partnerDto.getId())
                 .orElseThrow(() -> new InvalidPartnerIDException("El id no esta asociado a ningun socio"));
 
-        if (partnerDto.getApartment() != null) {
-            partner.setApartment(partnerDto.getApartment());
-        }
+        Consorcio consorcio = partner.getConsorcio();
 
-        if (partnerDto.getParticipation() > 0) {
-            partner.setParticipation(partnerDto.getParticipation());
-        }
+        partner.setApartment(partnerDto.getApartment());
+        partner.setParticipation(partnerDto.getParticipation());
 
         if (partnerDto.getRole() != null) {
-            partner.setRole(
-                    Partner.PartnerRole.valueOf(partnerDto.getRole().toUpperCase()));
+
+            if (partner.getRole() == Partner.PartnerRole.ADMIN) {
+                int min_admin_allowed = 1;
+                if (repository.countPartnerByRoleAndConsorcio_Id(
+                        Partner.PartnerRole.ADMIN, consorcio.getId()) == min_admin_allowed){
+                    throw new InvalidDataPartnerException("Debe haber al menos un admin en un consorcio");
+                };
+                partner.setRole(
+                        Partner.PartnerRole.valueOf(partnerDto.getRole().toUpperCase()));
+            }
         }
 
         repository.save(partner);
