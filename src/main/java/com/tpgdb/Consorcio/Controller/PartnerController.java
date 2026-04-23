@@ -16,7 +16,6 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/partner")
-@CrossOrigin("*")
 public class PartnerController {
 
     private final PartnerService service;

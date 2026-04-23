@@ -16,7 +16,6 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/consorcios")
-@CrossOrigin("*")
 public class ConsorcioController {
 
     private final ConsorcioService consortioService;
