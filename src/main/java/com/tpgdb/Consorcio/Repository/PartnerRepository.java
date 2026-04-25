@@ -12,6 +12,8 @@ import java.util.Optional;
 @Repository
 public interface PartnerRepository extends JpaRepository<Partner, Long> {
 
+    Optional<Partner> findByIdAndActiveIsTrue(Long id);
+
     List<Partner> findByUserIdAndActiveIsTrue(Long userId);
 
     List<Partner> findByConsorcioIdAndActiveIsTrue(Long consortioId);
