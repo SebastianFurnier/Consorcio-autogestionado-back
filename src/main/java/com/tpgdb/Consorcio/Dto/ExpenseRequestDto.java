@@ -23,6 +23,6 @@ public class ExpenseRequestDto {
 
         @NotNull(message = "La fecha es obligatoria.")
         private LocalDate date;
-
-        private Long partnerId;
+        
+        private Long consorcioId;
 }

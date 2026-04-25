@@ -4,12 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 
 import com.tpgdb.Consorcio.Dto.ExpenseRequestDto;
 import com.tpgdb.Consorcio.Service.ExpenseService;
@@ -33,9 +29,13 @@ public class ExpenseController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     * Obtiene los gastos filtrados por consorcio.
+     * * @param consorcioId ID que viene del frontend como ?consorcioId=...
+     */
     @GetMapping("/all")
-    public ResponseEntity<Map<String, List<ExpenseRequestDto>>> getAll() {
-        List<ExpenseRequestDto> allExpenses = service.getAllExpenses();
+    public ResponseEntity<Map<String, List<ExpenseRequestDto>>> getAll(@RequestParam Long consorcioId) {
+        List<ExpenseRequestDto> allExpenses = service.getAllExpensesOfConsortium(consorcioId);
         return ResponseEntity.ok(Map.of("response", allExpenses));
     }
 

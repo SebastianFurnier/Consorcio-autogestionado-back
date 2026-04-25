@@ -26,13 +26,13 @@ public class Expense {
         private LocalDate date;
         
         @ManyToOne
-        @JoinColumn(name = "partner_id")
-        private Partner partner;
+        @JoinColumn(name = "consorcio_id")
+        private Consorcio consorcio;
 
-        public Expense(float amount, String description, LocalDate date, Partner partner) {
+        public Expense(float amount, String description, LocalDate date, Consorcio consorcio) {
                 this.amount = amount;
                 this.description = description;
                 this.date = date;
-                this.partner = partner;
+                this.consorcio = consorcio;
         }
 }
