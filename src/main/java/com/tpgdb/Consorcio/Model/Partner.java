@@ -35,6 +35,9 @@ public class Partner {
     @Column(nullable = false)
     private boolean active = true;
 
+    @OneToMany(mappedBy = "partner", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Payment> payments;
+
     public Partner(User user, Consorcio consorcio, PartnerRole role) {
         this.user = user;
         this.consorcio = consorcio;
