@@ -1,0 +1,7 @@
+package com.tpgdb.Consorcio.Exception;
+
+public class UserAlreadyExistsException extends RuntimeException {
+    public UserAlreadyExistsException(String message) {
+        super(message);
+    }
+}

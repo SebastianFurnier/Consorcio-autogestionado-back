@@ -10,6 +10,7 @@ COPY src ./src
 
 RUN mvn clean package -DskipTests
 
+# -------- RUN STAGE --------
 FROM eclipse-temurin:21-jre
 
 WORKDIR /app

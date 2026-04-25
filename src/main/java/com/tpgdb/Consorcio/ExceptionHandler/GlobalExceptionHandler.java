@@ -1,9 +1,6 @@
 package com.tpgdb.Consorcio.ExceptionHandler;
 
-import com.tpgdb.Consorcio.Exception.ErrorResponse;
-import com.tpgdb.Consorcio.Exception.FieldError;
-import com.tpgdb.Consorcio.Exception.InvalidDataPartnerException;
-import com.tpgdb.Consorcio.Exception.InvalidPartnerIDException;
+import com.tpgdb.Consorcio.Exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -52,6 +49,27 @@ public class GlobalExceptionHandler {
 
         FieldError error = new FieldError("Error", ex.getMessage());
 
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<FieldError> handleInvalidCredentials(
+            InvalidCredentialsException ex) {
+        FieldError error = new FieldError("Error", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UserAlreadyExistsException.class)
+    public ResponseEntity<FieldError> handleUserAlreadyExists(
+            UserAlreadyExistsException ex) {
+        FieldError error = new FieldError("Error", ex.getMessage());
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidConsorcioException.class)
+    public ResponseEntity<FieldError> handleInvalidConsorcio(
+            InvalidConsorcioException ex) {
+        FieldError error = new FieldError("Error", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
