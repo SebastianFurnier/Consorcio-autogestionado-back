@@ -17,7 +17,7 @@ public class ExpenseRequestDto {
         @Positive(message = "El monto debe ser mayor a cero.")
         private float amount;
 
-        @NotBlank(message = "El numero de departamento no debe estar vacio.")
+        @NotBlank(message = "La descripción no debe estar vacia.")
         private String description;
 
 
