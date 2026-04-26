@@ -10,6 +10,7 @@ import com.tpgdb.Consorcio.Repository.PartnerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;  
 import java.util.List;
+import jakarta.transaction.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,10 +19,11 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final PartnerRepository partnerRepository;
 
+    @Transactional
     public PaymentResponseDto createPayment(PaymentRequestDto paymentDto) {
         Partner partner = partnerRepository.findById(paymentDto.getPartnerId())
-                .orElseThrow(() -> new RuntimeException("Socio no encontrado"));
-
+            .orElseThrow(() -> new RuntimeException("Socio no encontrado con ID: " + paymentDto.getPartnerId()));
+        
         Payment payment = new Payment();
         payment.setPartner(partner);
         payment.setPaymentDate(paymentDto.getPaymentDate());
@@ -29,7 +31,7 @@ public class PaymentService {
         payment.setAmount(paymentDto.getAmount());
         payment.setPaymentMethod(paymentDto.getPaymentMethod());
         payment.setDescription(paymentDto.getDescription());
-
+        
         Payment savedPayment = paymentRepository.save(payment);
         return convertToResponseDto(savedPayment);
     }

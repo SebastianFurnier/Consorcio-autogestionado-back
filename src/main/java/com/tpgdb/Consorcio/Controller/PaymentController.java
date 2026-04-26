@@ -20,7 +20,7 @@ public class PaymentController {
     @PostMapping("/save")
     public ResponseEntity<?> createPayment(@Valid @RequestBody PaymentRequestDto paymentDto) {
         PaymentResponseDto responseDto = paymentService.createPayment(paymentDto);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(Map.of("response", responseDto));
     }
 
     /**

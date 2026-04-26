@@ -1,9 +1,10 @@
 package com.tpgdb.Consorcio.Repository;
 
-import com.tpgdb.Consorcio.Model.Payment.PaymentMethod;
+import com.tpgdb.Consorcio.Model.Payment;
 import com.tpgdb.Consorcio.Model.Partner;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import java.time.LocalDate;
 
 import java.util.List;
 import java.util.Optional;
