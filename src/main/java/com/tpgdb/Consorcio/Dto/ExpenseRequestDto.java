@@ -25,4 +25,5 @@ public class ExpenseRequestDto {
         private LocalDate date;
         
         private Long consorcioId;
+        private Long partnerId;
 }

@@ -2,16 +2,10 @@ package com.tpgdb.Consorcio.Model;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 
 @Entity
 @NoArgsConstructor
@@ -24,15 +18,19 @@ public class Expense {
         private float amount;
         private String description;
         private LocalDate date;
+        @OneToOne
+        @JoinColumn(name = "partner_id")
+        private Partner partner;
         
         @ManyToOne
         @JoinColumn(name = "consorcio_id")
         private Consorcio consorcio;
 
-        public Expense(float amount, String description, LocalDate date, Consorcio consorcio) {
+        public Expense(float amount, String description, LocalDate date, Consorcio consorcio, Partner partner) {
                 this.amount = amount;
                 this.description = description;
                 this.date = date;
                 this.consorcio = consorcio;
+                this.partner = partner;
         }
 }
