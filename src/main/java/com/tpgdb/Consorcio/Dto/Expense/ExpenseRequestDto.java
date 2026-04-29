@@ -1,4 +1,4 @@
-package com.tpgdb.Consorcio.Dto;
+package com.tpgdb.Consorcio.Dto.Expense;
 import java.time.LocalDate;
 
 import jakarta.validation.constraints.NotBlank;
@@ -12,18 +12,14 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ExpenseRequestDto {
-        private Long id;
         @NotNull(message = "El monto es obligatorio.")
         @Positive(message = "El monto debe ser mayor a cero.")
         private float amount;
-
         @NotBlank(message = "La descripción no debe estar vacia.")
         private String description;
-
-
         @NotNull(message = "La fecha es obligatoria.")
         private LocalDate date;
-        
         private Long consorcioId;
         private Long partnerId;
+        private String category;
 }
