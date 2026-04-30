@@ -29,7 +29,7 @@ public class Expense {
         private boolean approved;
 
         public Expense(float amount, String description, LocalDate date,
-                       Partner partner, Consorcio consorcio, String category) {
+                        Partner partner, Consorcio consorcio, String category) {
                 this.amount = amount;
                 this.description = description;
                 this.date = date;

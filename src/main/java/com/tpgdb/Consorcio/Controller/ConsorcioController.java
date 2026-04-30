@@ -3,6 +3,7 @@ package com.tpgdb.Consorcio.Controller;
 import com.tpgdb.Consorcio.Dto.Consorcio.ConsorcioRequestDto;
 import com.tpgdb.Consorcio.Dto.Consorcio.ConsorcioResponseDto;
 import com.tpgdb.Consorcio.Dto.Consorcio.UnirseConsorcioRequestDto;
+import com.tpgdb.Consorcio.Dto.Consorcio.ConsorcioUpdateNombreRequestDto;
 import com.tpgdb.Consorcio.Service.ConsorcioService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -53,5 +54,17 @@ public class ConsorcioController {
         Long userId = (Long) authentication.getPrincipal();
         ConsorcioResponseDto consorcio = consortioService.obtenerConsorcioById(id, userId);
         return ResponseEntity.ok(consorcio);
+    }
+
+    @PutMapping("/{id}/nombre")
+    public ResponseEntity<Map<String, Object>> actualizarNombre(
+            @PathVariable Long id,
+            @Valid @RequestBody ConsorcioUpdateNombreRequestDto requestDto,
+            Authentication authentication) {
+        Long userId = (Long) authentication.getPrincipal();
+        ConsorcioResponseDto consorcio = consortioService.actualizarNombreConsorcio(id, requestDto.getNombre(), userId);
+        return ResponseEntity.ok(Map.of(
+                "message", "Nombre del consorcio actualizado exitosamente",
+                "consorcio", consorcio));
     }
 }

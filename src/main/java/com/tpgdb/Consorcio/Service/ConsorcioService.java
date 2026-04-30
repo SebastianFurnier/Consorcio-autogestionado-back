@@ -4,6 +4,7 @@ import com.tpgdb.Consorcio.Dto.Consorcio.ConsorcioRequestDto;
 import com.tpgdb.Consorcio.Dto.Consorcio.ConsorcioResponseDto;
 import com.tpgdb.Consorcio.Dto.Consorcio.UnirseConsorcioRequestDto;
 import com.tpgdb.Consorcio.Exception.InvalidConsorcioException;
+import com.tpgdb.Consorcio.Exception.MaxPartnerLimitExceededException;
 import com.tpgdb.Consorcio.Model.Consorcio;
 import com.tpgdb.Consorcio.Model.Partner;
 import com.tpgdb.Consorcio.Model.User;
@@ -54,16 +55,20 @@ public class ConsorcioService {
                 // Generar código de invitación
                 String codigo = generateInvitationCode();
 
+                // Crear la entidad Consorcio
                 Consorcio consorcio = new Consorcio(
                                 requestDto.getNombre(),
                                 codigo,
-                                user);
+                                user,
+                                requestDto.getMaxPartners());
 
                 Consorcio savedConsorcio = consortioRepository.save(consorcio);
 
                 // Crear Partner para el creador (ADMIN)
                 Partner partner = new Partner(user, savedConsorcio, Partner.PartnerRole.ADMIN);
                 partnerRepository.save(partner);
+                // Recalculamos para que el primer socio (ADMIN) tenga el 100% inmediatamente
+                recalcularParticipaciones(savedConsorcio.getId());
 
                 return buildConsorcioResponse(savedConsorcio, Partner.PartnerRole.ADMIN, 1);
         }
@@ -83,8 +88,7 @@ public class ConsorcioService {
 
                 String codigoFormateado = formatCode(codigoLimpio);
 
-                // Buscar consorcio (buscarlo aunque esté inactivo para poder
-                // reactivarlo)
+                // Buscar consorcio (buscarlo aunque esté inactivo para poder reactivarlo)
                 Consorcio consorcio = consortioRepository.findByCodigoInvitacion(codigoFormateado)
                                 .orElseThrow(() -> new InvalidConsorcioException(
                                                 "Código de invitación inválido o consorcio inexistente"));
@@ -98,23 +102,37 @@ public class ConsorcioService {
                         if (partner.isActive()) {
                                 throw new InvalidConsorcioException("Ya perteneces a este consorcio");
                         } else {
+                                long miembrosActuales = partnerRepository
+                                                .findByConsorcioIdAndActiveIsTrue(consorcio.getId()).size();
+                                if (miembrosActuales >= consorcio.getMaxPartners()) {
+                                        throw new MaxPartnerLimitExceededException(
+                                                        "Se alcanzó la cantidad máxima de partners permitidos para este consorcio");
+                                }
+
                                 partner.setActive(true);
                                 partnerRepository.save(partner);
 
-                                // Si el consorcio estaba inactivo (porque se habían ido todos), revive al
-                                // entrar el primero.
+                                // Si el consorcio estaba inactivo, revive al entrar el primero.
                                 if (!consorcio.isActive()) {
                                         consorcio.setActive(true);
                                         consortioRepository.save(consorcio);
                                 }
 
-                                long cantidadMiembros = partnerRepository
-                                                .findByConsorcioIdAndActiveIsTrue(consorcio.getId()).size();
-                                return buildConsorcioResponse(consorcio, partner.getRole(), cantidadMiembros);
+                                // Recalcular participaciones de todos los socios activos
+                                recalcularParticipaciones(consorcio.getId());
+
+                                return buildConsorcioResponse(consorcio, partner.getRole(), miembrosActuales + 1);
                         }
                 }
 
-                // Si no existía el vínculo, crear uno nuevo
+                long cantidadMiembrosActual = partnerRepository.findByConsorcioIdAndActiveIsTrue(consorcio.getId())
+                                .size();
+
+                if (cantidadMiembrosActual >= consorcio.getMaxPartners()) {
+                        throw new MaxPartnerLimitExceededException(
+                                        "Se alcanzó la cantidad máxima de partners permitidos para este consorcio");
+                }
+
                 if (!consorcio.isActive()) {
                         consorcio.setActive(true);
                         consortioRepository.save(consorcio);
@@ -123,8 +141,10 @@ public class ConsorcioService {
                 Partner nuevoPartner = new Partner(user, consorcio, Partner.PartnerRole.MEMBER);
                 partnerRepository.save(nuevoPartner);
 
-                long cantidadMiembros = partnerRepository.findByConsorcioIdAndActiveIsTrue(consorcio.getId()).size();
-                return buildConsorcioResponse(consorcio, Partner.PartnerRole.MEMBER, cantidadMiembros);
+                // Recalcular participaciones de todos los socios activos
+                recalcularParticipaciones(consorcio.getId());
+
+                return buildConsorcioResponse(consorcio, Partner.PartnerRole.MEMBER, cantidadMiembrosActual + 1);
         }
 
         public List<ConsorcioResponseDto> obtenerMisConsorcios(Long userId) {
@@ -154,8 +174,10 @@ public class ConsorcioService {
 
                 User user = userRepository.findById(userId)
                                 .orElseThrow(() -> new InvalidConsorcioException("Usuario no encontrado"));
+
                 Partner partner = partnerRepository.findByUserAndConsorcio(user, consorcio)
                                 .orElseThrow(() -> new InvalidConsorcioException("No tienes acceso a este consorcio"));
+
                 if (!partner.isActive()) {
                         throw new InvalidConsorcioException("Ya no eres miembro de este consorcio.");
                 }
@@ -167,6 +189,49 @@ public class ConsorcioService {
                 return buildConsorcioResponse(consorcio, partner.getRole(), cantidadMiembros);
         }
 
+        public ConsorcioResponseDto actualizarNombreConsorcio(Long consorcioId, String nuevoNombre, Long userId) {
+                // Obtener consorcio
+                Consorcio consorcio = consortioRepository.findById(consorcioId)
+                                .orElseThrow(() -> new InvalidConsorcioException("Consorcio no encontrado"));
+
+                if (!consorcio.isActive()) {
+                        throw new InvalidConsorcioException("Este consorcio ya no está activo.");
+                }
+
+                // Obtener usuario
+                User user = userRepository.findById(userId)
+                                .orElseThrow(() -> new InvalidConsorcioException("Usuario no encontrado"));
+
+                // Verificar que el usuario sea ADMIN
+                Partner partner = partnerRepository.findByUserAndConsorcio(user, consorcio)
+                                .orElseThrow(() -> new InvalidConsorcioException("No tienes acceso a este consorcio"));
+
+                if (!partner.isActive()) {
+                        throw new InvalidConsorcioException("Ya no eres miembro de este consorcio.");
+                }
+
+                if (partner.getRole() != Partner.PartnerRole.ADMIN) {
+                        throw new InvalidConsorcioException(
+                                        "Solo los administradores pueden editar el nombre del consorcio");
+                }
+
+                // Validar que el nombre no esté vacío o solo espacios
+                if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
+                        throw new InvalidConsorcioException(
+                                        "El nombre del consorcio no puede estar vacío o contener solo espacios");
+                }
+
+                // Actualizar nombre
+                consorcio.setNombre(nuevoNombre.trim());
+                Consorcio consorcioActualizado = consortioRepository.save(consorcio);
+
+                long cantidadMiembros = partnerRepository
+                                .findByConsorcioIdAndActiveIsTrue(consorcioId)
+                                .size();
+
+                return buildConsorcioResponse(consorcioActualizado, partner.getRole(), cantidadMiembros);
+        }
+
         private ConsorcioResponseDto buildConsorcioResponse(Consorcio consorcio, Partner.PartnerRole role,
                         long cantidadMiembros) {
                 return new ConsorcioResponseDto(
@@ -176,6 +241,27 @@ public class ConsorcioService {
                                 consorcio.getCreadoPor().getNombre(),
                                 consorcio.getFechaCreacion(),
                                 role.toString(),
-                                cantidadMiembros);
+                                cantidadMiembros,
+                                consorcio.getMaxPartners());
+        }
+
+        /**
+         * Recalcula y actualiza las participaciones de todos los socios activos del
+         * consorcio
+         * para que sean equitativas (100 / cantidad de socios activos)
+         */
+        void recalcularParticipaciones(Long consorcioId) {
+                List<Partner> sociosActivos = partnerRepository.findByConsorcioIdAndActiveIsTrue(consorcioId);
+
+                if (sociosActivos.isEmpty()) {
+                        return;
+                }
+
+                float participacionEquitativa = 100.0f / sociosActivos.size();
+
+                for (Partner socio : sociosActivos) {
+                        socio.setParticipation(participacionEquitativa);
+                        partnerRepository.save(socio);
+                }
         }
 }
