@@ -23,6 +23,7 @@ public class PartnerService {
     private final PartnerRepository repository;
     private final UserRepository userRepository;
     private final ConsorcioRepository consorcioRepository;
+    private final ConsorcioService consorcioService;
 
     public void createNewPartner(PartnerRequestDto partnerDto) {
         User user = userRepository.findById(partnerDto.getUserId())
@@ -44,11 +45,15 @@ public class PartnerService {
             partner.setApartment(partnerDto.getApartment());
         }
 
-        if (partnerDto.getParticipation() > 0) {
-            partner.setParticipation(partnerDto.getParticipation());
-        }
-
+        // Guardamos el nuevo socio en la DB
         repository.save(partner);
+
+        // Ignoramos partnerDto.getParticipation() para forzar el reparto equitativo.
+        // Esto garantiza que si hay 3 personas, ahora las 3 pasen a tener 33.33%
+        // automáticamente.
+        // REFINAR ESTO EN LOS PROXIMOS SPRINTS (definir bien el sistema de
+        // participacion)
+        consorcioService.recalcularParticipaciones(consorcio.getId());
     }
 
     public void deletePartnerById(Long id, Long authenticatedUserId) {
@@ -83,6 +88,9 @@ public class PartnerService {
             Consorcio consorcio = partnerToDelete.getConsorcio();
             consorcio.setActive(false);
             consorcioRepository.save(consorcio);
+        } else {
+            // Si queda gente, recalcular participaciones de forma equitativa
+            consorcioService.recalcularParticipaciones(consorcioId);
         }
     }
 
@@ -96,20 +104,21 @@ public class PartnerService {
     public void editPartner(PartnerEditRequestDTO partnerDto) {
         Partner partner = repository.findByIdAndActiveIsTrue(partnerDto.getId())
                 .orElseThrow(() -> new InvalidPartnerIDException("El id no esta asociado a ningun socio"));
-    
+
         Consorcio consorcio = partner.getConsorcio();
 
         partner.setApartment(partnerDto.getApartment());
-        partner.setParticipation(partnerDto.getParticipation());
 
         if (partnerDto.getRole() != null) {
 
             if (partner.getRole() == Partner.PartnerRole.ADMIN) {
                 int min_admin_allowed = 1;
-                if ((Partner.PartnerRole.MEMBER == partnerDto.getRole()) && (repository.countPartnerByRoleAndConsorcio_Id(
-                        Partner.PartnerRole.ADMIN, consorcio.getId()) == min_admin_allowed)){
+                if ((Partner.PartnerRole.MEMBER == partnerDto.getRole())
+                        && (repository.countPartnerByRoleAndConsorcio_Id(
+                                Partner.PartnerRole.ADMIN, consorcio.getId()) == min_admin_allowed)) {
                     throw new InvalidDataPartnerException("Debe haber al menos un admin en un consorcio");
-                };
+                }
+                ;
                 partner.setRole(partnerDto.getRole());
             }
         }

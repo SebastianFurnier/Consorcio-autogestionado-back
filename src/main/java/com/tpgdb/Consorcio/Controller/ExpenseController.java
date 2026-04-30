@@ -7,7 +7,6 @@ import com.tpgdb.Consorcio.Dto.Expense.ExpenseResponseDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-
 import com.tpgdb.Consorcio.Dto.Expense.ExpenseRequestDto;
 import com.tpgdb.Consorcio.Service.ExpenseService;
 

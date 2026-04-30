@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
+import java.util.Map;
 import java.util.List;
 
 @RestControllerAdvice
@@ -20,16 +20,14 @@ public class GlobalExceptionHandler {
                 .stream()
                 .map(err -> new FieldError(
                         err.getField(),
-                        err.getDefaultMessage()
-                ))
+                        err.getDefaultMessage()))
                 .toList();
 
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation error",
                 System.currentTimeMillis(),
-                errors
-        );
+                errors);
 
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
@@ -71,6 +69,15 @@ public class GlobalExceptionHandler {
             InvalidConsorcioException ex) {
         FieldError error = new FieldError("Error", ex.getMessage());
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MaxPartnerLimitExceededException.class)
+    public ResponseEntity<Map<String, String>> handleMaxPartnerLimitExceeded(
+            MaxPartnerLimitExceededException ex) {
+
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(Map.of("message", ex.getMessage()));
     }
 
 }

@@ -18,4 +18,5 @@ public class ConsorcioResponseDto {
     private LocalDateTime fechaCreacion;
     private String rol; // ADMIN o MEMBER
     private long cantidadMiembros;
+    private Integer maxPartners;
 }

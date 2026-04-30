@@ -34,10 +34,14 @@ public class Consorcio {
     @Column(nullable = false)
     private boolean active = true;
 
-    public Consorcio(String nombre, String codigoInvitacion, User creadoPor) {
+    @Column(nullable = false)
+    private Integer maxPartners;
+
+    public Consorcio(String nombre, String codigoInvitacion, User creadoPor, Integer maxPartners) {
         this.nombre = nombre;
         this.codigoInvitacion = codigoInvitacion;
         this.creadoPor = creadoPor;
+        this.maxPartners = maxPartners; // Se asigna lo que viene del front
         this.fechaCreacion = LocalDateTime.now();
         this.active = true;
     }
