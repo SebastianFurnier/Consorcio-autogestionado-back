@@ -27,8 +27,11 @@ public class PaymentController {
      * Listar todos los pagos (temporal, voy a agregar filtros)
      */
     @GetMapping("/all")
-    public ResponseEntity<Map<String, List<PaymentResponseDto>>> getAllPayments() {
-        List<PaymentResponseDto> payments = paymentService.getAllPayments();
+    // Agregamos @RequestParam para capturar el ID que viene en la URL
+    public ResponseEntity<Map<String, List<PaymentResponseDto>>> getAllPayments(
+            @RequestParam(name = "consorcioId") Long consorcioId) {
+        // Pasamos el ID al service
+        List<PaymentResponseDto> payments = paymentService.getAllPaymentsByConsorcio(consorcioId);
         return ResponseEntity.ok(Map.of("response", payments));
     }
 }
