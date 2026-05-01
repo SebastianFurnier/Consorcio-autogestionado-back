@@ -8,4 +8,6 @@ import com.tpgdb.Consorcio.Model.Expense;
 
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
         List<Expense> findByConsorcioId(Long consorcioId);
+
+        List<Expense> findApprovedByConsorcioId(Long consorcioId);
 }

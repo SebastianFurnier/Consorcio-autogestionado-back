@@ -39,4 +39,10 @@ public class ExpenseController {
         return ResponseEntity.ok(Map.of("response", allExpenses));
     }
 
+    @GetMapping("/approved")
+    public ResponseEntity<Map<String, List<ExpenseResponseDto>>> getApproved(@RequestParam Long consorcioId) {
+        List<ExpenseResponseDto> approvedExpenses = service.getApprovedExpensesOfConsortium(consorcioId);
+        return ResponseEntity.ok(Map.of("response", approvedExpenses));
+    }
+
 }
