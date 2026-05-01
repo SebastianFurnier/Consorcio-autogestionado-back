@@ -4,8 +4,10 @@ import com.tpgdb.Consorcio.Dto.payment.PaymentRequestDto;
 import com.tpgdb.Consorcio.Dto.payment.PaymentResponseDto;
 import com.tpgdb.Consorcio.Model.Partner;
 import com.tpgdb.Consorcio.Model.Payment;
+import com.tpgdb.Consorcio.Model.Expense;
 import com.tpgdb.Consorcio.Repository.PaymentRepository;
 import com.tpgdb.Consorcio.Repository.PartnerRepository;
+import com.tpgdb.Consorcio.Repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -17,14 +19,19 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PartnerRepository partnerRepository;
+    private final ExpenseRepository expenseRepository;
 
     @Transactional
     public PaymentResponseDto createPayment(PaymentRequestDto paymentDto) {
         Partner partner = partnerRepository.findById(paymentDto.getPartnerId())
                 .orElseThrow(() -> new RuntimeException("Socio no encontrado con ID: " + paymentDto.getPartnerId()));
 
+        Expense expense = expenseRepository.findById(paymentDto.getExpenseId())
+                .orElseThrow(() -> new RuntimeException("Gasto no encontrado con ID: " + paymentDto.getExpenseId()));
+
         Payment payment = new Payment();
         payment.setPartner(partner);
+        payment.setExpense(expense);
         payment.setPaymentDate(paymentDto.getPaymentDate());
         payment.setPeriod(paymentDto.getPeriod());
         payment.setAmount(paymentDto.getAmount());
@@ -58,6 +65,7 @@ public class PaymentService {
         return new PaymentResponseDto(
                 payment.getId(),
                 payment.getPartner().getId(),
+                payment.getExpense().getId(),
                 payment.getPaymentDate(),
                 payment.getPeriod(),
                 payment.getAmount(),

@@ -19,6 +19,9 @@ public class PaymentRequestDto {
     @NotNull(message = "El partnerId es obligatorio")
     private Long partnerId;
 
+    @NotNull(message = "El expenseId es obligatorio")
+    private Long expenseId;
+
     @NotNull(message = "La fecha de pago es obligatoria")
     private LocalDate paymentDate;
 

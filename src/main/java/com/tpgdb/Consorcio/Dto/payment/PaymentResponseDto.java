@@ -14,6 +14,7 @@ import java.time.LocalDate;
 public class PaymentResponseDto {
     private Long id;
     private Long partnerId;
+    private Long expenseId;
     private LocalDate paymentDate;
     private LocalDate period;
     private float amount;

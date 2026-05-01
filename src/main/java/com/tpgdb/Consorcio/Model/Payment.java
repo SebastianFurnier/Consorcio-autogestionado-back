@@ -23,6 +23,10 @@ public class Payment {
     @JoinColumn(name = "partner_id", nullable = false)
     private Partner partner;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "expense_id", nullable = false)
+    private Expense expense;
+
     @Column(nullable = false)
     private LocalDate paymentDate;
 
