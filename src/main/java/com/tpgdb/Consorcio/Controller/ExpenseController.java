@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/expense")
-@CrossOrigin("*")
 public class ExpenseController {
 
     private final ExpenseService service;
