@@ -39,18 +39,21 @@ public class BalanceService {
                 List<Partner> partners = partnerRepository.findByConsorcioIdAndActiveIsTrue(consorcioId);                
                 partners.forEach((partner) -> {
                         Long partnerId = partner.getId();
-                        PartnerBalance partnerBalance = new PartnerBalance(partnerId, partner.getParticipation() * gastoTotal / 100);
+                        float partnerDebt = partner.getParticipation() * gastoTotal / 100;
+                        PartnerBalance partnerBalance = new PartnerBalance(partnerId, partnerDebt);
                         float monto = (float) paymentRepository.findByPartnerId(partnerId)
                         .stream()
                         .mapToDouble(Payment::getAmount)
                         .sum();
                         
                         partnerBalance.setPayments(monto);
+                        if (monto - partnerDebt < 0) {
+                                partnerBalance.setPenaltyForLatePayment((partnerDebt-monto)*1.05f);
+                        }
                         partnerBalances.put(partnerId, partnerBalance);
                         response.addPayment(monto);
                 });      
                 response.setPerPartnerBalance(new ArrayList<>(partnerBalances.values()));
-                // escoger la logica de mora
                 return response;
         }
 }

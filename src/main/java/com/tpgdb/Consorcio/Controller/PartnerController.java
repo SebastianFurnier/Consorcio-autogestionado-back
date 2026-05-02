@@ -44,6 +44,11 @@ public class PartnerController {
         return ResponseEntity.ok(Map.of("response", partnerList));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<PartnerResponseDto> getPartner(@PathVariable Long id) {
+        return ResponseEntity.ok(service.getPartnerById(id));
+    }
+
     @PutMapping("/edit")
     public ResponseEntity<?> editPartner(@Valid @RequestBody PartnerEditRequestDTO partnerDto) {
         service.editPartner(partnerDto);

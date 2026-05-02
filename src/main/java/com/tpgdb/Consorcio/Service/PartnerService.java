@@ -101,6 +101,13 @@ public class PartnerService {
                 .toList();
     }
 
+    public PartnerResponseDto getPartnerById(Long PartnerId) {
+        Partner partner = repository.findByIdAndActiveIsTrue(PartnerId)
+        .orElseThrow(() -> new InvalidPartnerIDException("El id no esta asociado a ningun socio"));
+        
+        return convertToDto(partner);
+    }
+
     public void editPartner(PartnerEditRequestDTO partnerDto) {
         Partner partner = repository.findByIdAndActiveIsTrue(partnerDto.getId())
                 .orElseThrow(() -> new InvalidPartnerIDException("El id no esta asociado a ningun socio"));
