@@ -34,4 +34,12 @@ public class PaymentController {
         List<PaymentResponseDto> payments = paymentService.getAllPaymentsByConsorcio(consorcioId);
         return ResponseEntity.ok(Map.of("response", payments));
     }
+
+    @GetMapping("/period")
+    public ResponseEntity<Map<String, List<PaymentResponseDto>>> getPaymentsByPeriod(
+            @RequestParam(name = "consorcioId") Long consorcioId,
+            @RequestParam(name = "period") String period) {
+        List<PaymentResponseDto> payments = paymentService.getPaymentsByConsorcioAndPeriod(consorcioId, period);
+        return ResponseEntity.ok(Map.of("response", payments));
+    }
 }

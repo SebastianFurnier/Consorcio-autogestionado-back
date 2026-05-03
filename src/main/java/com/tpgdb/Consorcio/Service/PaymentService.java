@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import jakarta.transaction.Transactional;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +57,13 @@ public class PaymentService {
 
     public List<PaymentResponseDto> getAllPayments() {
         List<Payment> payments = paymentRepository.findAll();
+        return payments.stream()
+                .map(this::convertToResponseDto)
+                .toList();
+    }
+
+    public List<PaymentResponseDto> getPaymentsByConsorcioAndPeriod(Long consorcioId, String period) {
+        List<Payment> payments = paymentRepository.findByPartner_Consorcio_IdAndPeriod(consorcioId, LocalDate.parse(period));
         return payments.stream()
                 .map(this::convertToResponseDto)
                 .toList();
