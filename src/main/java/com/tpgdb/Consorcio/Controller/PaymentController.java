@@ -3,8 +3,8 @@ package com.tpgdb.Consorcio.Controller;
 import com.tpgdb.Consorcio.Dto.payment.PaymentResponseDto;
 import com.tpgdb.Consorcio.Dto.payment.PaymentRequestDto;
 import com.tpgdb.Consorcio.Service.DebtService;
-import com.tpgdb.Consorcio.Service.ImageService;
 import com.tpgdb.Consorcio.Service.PaymentService;
+import com.tpgdb.Consorcio.Service.UploadImageService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -23,20 +23,17 @@ import java.util.UUID;
     public class PaymentController {
         private final PaymentService paymentService;
         private final DebtService debtService;
-        private final ImageService imageService;
+        private final UploadImageService imageService;
 
         @PostMapping(
                 value = "/save",
                 consumes = MediaType.MULTIPART_FORM_DATA_VALUE
         )
         public ResponseEntity<?> createPayment(@Valid @RequestPart("paymentDto") PaymentRequestDto paymentDto,
-                                               @RequestParam("file") MultipartFile file) throws IOException {
-            String imageName = file.getOriginalFilename();
-            UUID hash = UUID.randomUUID();
-
-            String filename = (hash.toString()) + imageName;
+                                               @RequestParam("file") MultipartFile file) {
+            String filename =imageService.uploadFile(file);
             PaymentResponseDto responseDto = paymentService.createPayment(paymentDto, filename);
-            imageService.uploadImage(filename, file.getBytes());
+
             return ResponseEntity.ok(Map.of("response", responseDto));
         }
 

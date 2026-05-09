@@ -53,7 +53,6 @@ public class ExpenseService {
                 payment.setExpense(expense);
                 payment.setReceiptUrl("");
                 payment.setAmount(dto.getAmount() / debtors.size());
-                payment.setVoucherFilename("");
                 payment.setDescription(dto.getDescription());
                 payment.setPaymentMethod(Payment.PaymentMethod.OTHER);
                 payment.setPeriod(dto.getDate());

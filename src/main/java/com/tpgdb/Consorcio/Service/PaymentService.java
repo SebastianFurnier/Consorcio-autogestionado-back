@@ -22,11 +22,8 @@ public class PaymentService {
     private final PartnerRepository partnerRepository;
     private final DebtRepository debtRepository;
 
-    @Value("${app.image-base-url}")
-    private String imageBaseUrl;
-
     @Transactional
-    public PaymentResponseDto createPayment(PaymentRequestDto paymentDto, String filename) {
+    public PaymentResponseDto createPayment(PaymentRequestDto paymentDto, String url) {
         Partner partner = partnerRepository.findById(paymentDto.getPartnerId())
                 .orElseThrow(() -> new RuntimeException("Socio no encontrado con ID: " + paymentDto.getPartnerId()));
 
@@ -47,9 +44,8 @@ public class PaymentService {
         payment.setPeriod(paymentDto.getPeriod());
         payment.setPaymentMethod(paymentDto.getPaymentMethod());
         payment.setDescription(paymentDto.getDescription());
-        payment.setVoucherFilename(filename);
         payment.setAmount(debt.getAmount());
-        payment.setReceiptUrl(imageBaseUrl + filename);
+        payment.setReceiptUrl(url);
         payment.setConsorcioId(consorcio.getId());
 
         Payment savedPayment = paymentRepository.save(payment);
