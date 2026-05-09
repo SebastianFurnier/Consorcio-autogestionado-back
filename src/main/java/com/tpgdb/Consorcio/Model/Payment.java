@@ -44,22 +44,9 @@ public class Payment {
     @Column(length = 255)
     private String description;
 
-    private String voucherFilename;
-
     private String receiptUrl;
 
     private Long consorcioId;
-
-    public Payment(Partner partner, LocalDate paymentDate, LocalDate period, PaymentMethod paymentMethod,
-                   float amount, String voucherFilename) {
-        this.partner = partner;
-        this.paymentDate = paymentDate;
-        this.period = period;   // Primer día del mes
-        this.paymentMethod = paymentMethod;
-        this.description = null;
-        this.voucherFilename = voucherFilename;
-        this.amount = amount;
-    }
 
     public enum PaymentMethod {
         CASH,
