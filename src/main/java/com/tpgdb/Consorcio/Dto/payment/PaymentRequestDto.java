@@ -28,10 +28,6 @@ public class PaymentRequestDto {
     @NotNull(message = "El período es obligatorio")
     private LocalDate period;
 
-    @NotNull(message = "El monto es obligatorio")
-    @Positive(message = "El monto debe ser positivo")
-    private float amount;
-
     @NotNull(message = "El método de pago es obligatorio")
     private PaymentMethod paymentMethod;
 

@@ -12,6 +12,7 @@ import com.tpgdb.Consorcio.Repository.PartnerRepository;
 import com.tpgdb.Consorcio.Repository.UserRepository;
 import com.tpgdb.Consorcio.Repository.ConsorcioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -108,7 +109,11 @@ public class PartnerService {
         return convertToDto(partner);
     }
 
-    public void editPartner(PartnerEditRequestDTO partnerDto) {
+    public void editPartner(PartnerEditRequestDTO partnerDto, Authentication authentication) {
+        Long requestUserId = (Long) authentication.getPrincipal();
+        Partner requestPartner = repository.findByIdAndActiveIsTrue(requestUserId).
+                orElseThrow(() -> new InvalidDataPartnerException("El id no esta asociado a ningun socio"));
+
         Partner partner = repository.findByIdAndActiveIsTrue(partnerDto.getId())
                 .orElseThrow(() -> new InvalidPartnerIDException("El id no esta asociado a ningun socio"));
 
@@ -118,7 +123,7 @@ public class PartnerService {
 
         if (partnerDto.getRole() != null) {
 
-            if (partner.getRole() == Partner.PartnerRole.ADMIN) {
+            if (requestPartner.getRole() == Partner.PartnerRole.ADMIN) {
                 int min_admin_allowed = 1;
                 if ((Partner.PartnerRole.MEMBER == partnerDto.getRole())
                         && (repository.countPartnerByRoleAndConsorcio_Id(

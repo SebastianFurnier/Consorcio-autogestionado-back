@@ -2,13 +2,13 @@ package com.tpgdb.Consorcio.Service;
 
 import com.tpgdb.Consorcio.Dto.payment.PaymentRequestDto;
 import com.tpgdb.Consorcio.Dto.payment.PaymentResponseDto;
-import com.tpgdb.Consorcio.Model.Partner;
-import com.tpgdb.Consorcio.Model.Payment;
-import com.tpgdb.Consorcio.Model.Expense;
+import com.tpgdb.Consorcio.Exception.InvalidPartnerIDException;
+import com.tpgdb.Consorcio.Model.*;
+import com.tpgdb.Consorcio.Repository.DebtRepository;
 import com.tpgdb.Consorcio.Repository.PaymentRepository;
 import com.tpgdb.Consorcio.Repository.PartnerRepository;
-import com.tpgdb.Consorcio.Repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import jakarta.transaction.Transactional;
@@ -20,24 +20,37 @@ public class PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final PartnerRepository partnerRepository;
-    private final ExpenseRepository expenseRepository;
+    private final DebtRepository debtRepository;
+
+    @Value("${app.image-base-url}")
+    private String imageBaseUrl;
 
     @Transactional
-    public PaymentResponseDto createPayment(PaymentRequestDto paymentDto) {
+    public PaymentResponseDto createPayment(PaymentRequestDto paymentDto, String filename) {
         Partner partner = partnerRepository.findById(paymentDto.getPartnerId())
                 .orElseThrow(() -> new RuntimeException("Socio no encontrado con ID: " + paymentDto.getPartnerId()));
 
-        Expense expense = expenseRepository.findById(paymentDto.getExpenseId())
-                .orElseThrow(() -> new RuntimeException("Gasto no encontrado con ID: " + paymentDto.getExpenseId()));
+        Debt debt = debtRepository.findById(paymentDto.getExpenseId()).orElseThrow( () ->
+                new InvalidPartnerIDException("No se encontro el pago asociado")
+        );
+
+        debt.setPaid(true);
+        debtRepository.save(debt);
+
+        Expense expense = debt.getExpense();
+        Consorcio consorcio = partner.getConsorcio();
 
         Payment payment = new Payment();
         payment.setPartner(partner);
         payment.setExpense(expense);
         payment.setPaymentDate(paymentDto.getPaymentDate());
         payment.setPeriod(paymentDto.getPeriod());
-        payment.setAmount(paymentDto.getAmount());
         payment.setPaymentMethod(paymentDto.getPaymentMethod());
         payment.setDescription(paymentDto.getDescription());
+        payment.setVoucherFilename(filename);
+        payment.setAmount(debt.getAmount());
+        payment.setReceiptUrl(imageBaseUrl + filename);
+        payment.setConsorcioId(consorcio.getId());
 
         Payment savedPayment = paymentRepository.save(payment);
         return convertToResponseDto(savedPayment);
@@ -49,6 +62,7 @@ public class PaymentService {
      */
     public List<PaymentResponseDto> getAllPaymentsByConsorcio(Long consorcioId) {
         // El repositorio debe tener definido findByPartner_Consorcio_Id
+
         List<Payment> payments = paymentRepository.findByPartner_Consorcio_Id(consorcioId);
         return payments.stream()
                 .map(this::convertToResponseDto)
@@ -63,7 +77,7 @@ public class PaymentService {
     }
 
     public List<PaymentResponseDto> getPaymentsByConsorcioAndPeriod(Long consorcioId, String period) {
-        List<Payment> payments = paymentRepository.findByPartner_Consorcio_IdAndPeriod(consorcioId, LocalDate.parse(period));
+        List<Payment> payments = paymentRepository.findByConsorcioIdAndPeriodGreaterThanEqual(consorcioId, LocalDate.parse(period));
         return payments.stream()
                 .map(this::convertToResponseDto)
                 .toList();
@@ -76,8 +90,10 @@ public class PaymentService {
                 payment.getExpense().getId(),
                 payment.getPaymentDate(),
                 payment.getPeriod(),
-                payment.getAmount(),
                 payment.getPaymentMethod(),
-                payment.getDescription());
+                payment.getDescription(),
+                payment.getAmount(),
+                payment.getReceiptUrl()
+                );
     }
 }

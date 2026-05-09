@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.tpgdb.Consorcio.Dto.Expense.ExpenseResponseDto;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import com.tpgdb.Consorcio.Dto.Expense.ExpenseRequestDto;
@@ -39,7 +40,8 @@ public class ExpenseController {
     }
 
     @GetMapping("/approved")
-    public ResponseEntity<Map<String, List<ExpenseResponseDto>>> getApproved(@RequestParam Long consorcioId) {
+    public ResponseEntity<Map<String, List<ExpenseResponseDto>>> getApproved(@RequestParam Long consorcioId,
+                                                                             Authentication authentication) {
         List<ExpenseResponseDto> approvedExpenses = service.getApprovedExpensesOfConsortium(consorcioId);
         return ResponseEntity.ok(Map.of("response", approvedExpenses));
     }
