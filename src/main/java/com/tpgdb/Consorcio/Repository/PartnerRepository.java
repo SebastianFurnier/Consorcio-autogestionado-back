@@ -25,4 +25,6 @@ public interface PartnerRepository extends JpaRepository<Partner, Long> {
     boolean existsByUserAndConsorcio(User user, Consorcio consorcio);
 
     int countPartnerByRoleAndConsorcio_Id(Partner.PartnerRole role, Long consorcioId);
+
+    int countPartnerByActiveTrueAndConsorcio_id(Long consorcioId);
 }

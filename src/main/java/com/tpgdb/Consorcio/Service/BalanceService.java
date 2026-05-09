@@ -41,6 +41,8 @@ public class BalanceService {
                         Long partnerId = partner.getId();
                         float partnerDebt = partner.getParticipation() * gastoTotal / 100;
                         PartnerBalance partnerBalance = new PartnerBalance(partnerId, partnerDebt);
+
+                        /*
                         float monto = (float) paymentRepository.findByPartnerId(partnerId)
                         .stream()
                         .mapToDouble(Payment::getAmount)
@@ -52,7 +54,9 @@ public class BalanceService {
                         }
                         partnerBalances.put(partnerId, partnerBalance);
                         response.addPayment(monto);
-                });      
+                        */
+                });
+
                 response.setPerPartnerBalance(new ArrayList<>(partnerBalances.values()));
                 return response;
         }

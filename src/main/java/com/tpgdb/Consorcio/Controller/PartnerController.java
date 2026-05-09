@@ -50,8 +50,8 @@ public class PartnerController {
     }
 
     @PutMapping("/edit")
-    public ResponseEntity<?> editPartner(@Valid @RequestBody PartnerEditRequestDTO partnerDto) {
-        service.editPartner(partnerDto);
+    public ResponseEntity<?> editPartner(@Valid @RequestBody PartnerEditRequestDTO partnerDto, Authentication authentication) {
+        service.editPartner(partnerDto, authentication);
 
         return ResponseEntity.ok().build();
     }

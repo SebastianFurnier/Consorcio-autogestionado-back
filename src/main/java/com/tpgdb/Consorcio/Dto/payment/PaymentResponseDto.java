@@ -17,7 +17,8 @@ public class PaymentResponseDto {
     private Long expenseId;
     private LocalDate paymentDate;
     private LocalDate period;
-    private float amount;
     private PaymentMethod paymentMethod;
     private String description;
+    private float amount;
+    private String receiptUrl;
 }
