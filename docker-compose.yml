@@ -34,8 +34,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      garage:
-        condition: service_started
 
 volumes:
   pgdata:
