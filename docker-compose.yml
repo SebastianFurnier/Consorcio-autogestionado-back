@@ -19,9 +19,8 @@ services:
     image: dxflrs/garage:v0.9.0 # O la versión estable más reciente
     container_name: garage_server
     restart: always
-    ports:
-      - "3900:3900" # S3 API
-      - "3901:3901" # Web / Public access
+    expose:
+      - "3900"
     volumes:
       - ./garage.toml:/etc/garage.toml
       - ./garage_data:/var/lib/garage
@@ -46,6 +45,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      garage:
+        condition: service_started
 
 volumes:
   pgdata:

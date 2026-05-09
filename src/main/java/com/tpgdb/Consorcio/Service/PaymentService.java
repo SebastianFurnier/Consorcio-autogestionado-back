@@ -8,6 +8,7 @@ import com.tpgdb.Consorcio.Repository.DebtRepository;
 import com.tpgdb.Consorcio.Repository.PaymentRepository;
 import com.tpgdb.Consorcio.Repository.PartnerRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import jakarta.transaction.Transactional;
@@ -21,7 +22,8 @@ public class PaymentService {
     private final PartnerRepository partnerRepository;
     private final DebtRepository debtRepository;
 
-    private static final String imageBaseUrl = "http://consorcio.web.garage.localhost:3901/";
+    @Value("${app.image-base-url}")
+    private String imageBaseUrl;
 
     @Transactional
     public PaymentResponseDto createPayment(PaymentRequestDto paymentDto, String filename) {
