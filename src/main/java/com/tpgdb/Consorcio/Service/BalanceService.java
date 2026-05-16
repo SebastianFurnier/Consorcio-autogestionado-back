@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 
 import com.tpgdb.Consorcio.Dto.Balance.BalanceResponseDto;
 import com.tpgdb.Consorcio.Dto.Balance.PartnerBalance;
+import com.tpgdb.Consorcio.Model.Debt;
 import com.tpgdb.Consorcio.Model.Expense;
 import com.tpgdb.Consorcio.Model.Partner;
 import com.tpgdb.Consorcio.Model.Payment;
+import com.tpgdb.Consorcio.Repository.DebtRepository;
 import com.tpgdb.Consorcio.Repository.ExpenseRepository;
 import com.tpgdb.Consorcio.Repository.PartnerRepository;
 import com.tpgdb.Consorcio.Repository.PaymentRepository;
@@ -21,16 +23,16 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class BalanceService {
-        private final ExpenseRepository expenseRepository;
-        private final PaymentRepository paymentRepository;
         private final PartnerRepository partnerRepository;
+
+        private final DebtRepository debtRepository;
 
         public BalanceResponseDto getBalanceOfConsorcio(Long consorcioId) {
                 
-                float gastoTotal = (float) expenseRepository
-                .findApprovedByConsorcioId(consorcioId)
+                float gastoTotal = (float) debtRepository
+                .findByConsorcio_id(consorcioId)
                 .stream()
-                .mapToDouble(Expense::getAmount)
+                .mapToDouble(Debt::getAmount)
                 .sum();
                 
                 BalanceResponseDto response = new BalanceResponseDto(gastoTotal);
@@ -39,22 +41,21 @@ public class BalanceService {
                 List<Partner> partners = partnerRepository.findByConsorcioIdAndActiveIsTrue(consorcioId);                
                 partners.forEach((partner) -> {
                         Long partnerId = partner.getId();
-                        float partnerDebt = partner.getParticipation() * gastoTotal / 100;
-                        PartnerBalance partnerBalance = new PartnerBalance(partnerId, partnerDebt);
 
-                        /*
-                        float monto = (float) paymentRepository.findByPartnerId(partnerId)
+                        float partnerPayedAmount = (float) debtRepository.findByPaidIsTrueConsorcio_idAndPartner_id(consorcioId, partnerId)
                         .stream()
-                        .mapToDouble(Payment::getAmount)
+                        .mapToDouble(Debt::getAmount)
+                        .sum();
+                        float partnerNotPayedAmount = (float) debtRepository.findByPaidIsFalseAndConsorcio_idAndPartner_id(consorcioId, partnerId)
+                        .stream()
+                        .mapToDouble(Debt::getAmount)
                         .sum();
                         
-                        partnerBalance.setPayments(monto);
-                        if (monto - partnerDebt < 0) {
-                                partnerBalance.setPenaltyForLatePayment((partnerDebt-monto)*1.05f);
-                        }
+                        // el total de las deudas del parter son el monto de las pagadas + las no pagadas
+                        PartnerBalance partnerBalance = new PartnerBalance(partnerId, partnerPayedAmount, partnerNotPayedAmount + partnerPayedAmount);
+
                         partnerBalances.put(partnerId, partnerBalance);
-                        response.addPayment(monto);
-                        */
+                        response.addPayment(partnerPayedAmount);
                 });
 
                 response.setPerPartnerBalance(new ArrayList<>(partnerBalances.values()));

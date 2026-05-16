@@ -9,7 +9,10 @@ import java.util.List;
 
 @Repository
 public interface DebtRepository extends JpaRepository<Debt, Long> {
+    List<Debt> findByConsorcio_id(Long consorcioId);
     List<Debt> findByPaidIsFalseAndConsorcio_idAndPartner_id(Long consorcioId, Long partnerId);
+    List<Debt> findByPaidIsTrueConsorcio_idAndPartner_id(Long consorcioId, Long partnerId);
+
     @Query("""
         SELECT COUNT(DISTINCT d.partner.id)
         FROM Debt d

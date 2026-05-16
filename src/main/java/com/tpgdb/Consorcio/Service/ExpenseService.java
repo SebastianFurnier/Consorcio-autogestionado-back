@@ -43,10 +43,11 @@ public class ExpenseService {
                 float partialAmount = dto.getAmount() / debtors.size();
 
                 for (Partner debtor : debtors) {
-                    if (debtor.getId() != payer.getId()) {
-                        Debt debt = new Debt(debtor, consorcio, expense, partialAmount);
-                        debtRepository.save(debt);
-                    }
+                    Debt debt = new Debt(debtor, consorcio, expense, partialAmount);
+                    if (debtor.getId() == payer.getId()) {
+						debt.setPaid(true);
+					};
+					debtRepository.save(debt);
                 }
 
                 Payment payment = new Payment();

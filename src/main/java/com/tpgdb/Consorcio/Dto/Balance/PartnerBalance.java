@@ -15,11 +15,15 @@ public class PartnerBalance {
         private float debt;
         private float penaltyForLatePayment;
 
-        public PartnerBalance(Long partnerId, float debt) {
+        public PartnerBalance(Long partnerId, float payments, float debt) {
                 this.partnerId = partnerId;
-                this.payments = 0.0f;
+                this.payments = payments;
                 this.debt = debt;
                 this.penaltyForLatePayment = 0.0f;
+                
+                if (payments < debt) {
+                        penaltyForLatePayment = (debt-payments)*1.05f;
+                }
         }
 
         public void addPayment(float amount) {
