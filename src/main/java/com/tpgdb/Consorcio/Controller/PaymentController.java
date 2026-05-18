@@ -31,7 +31,7 @@ import java.util.UUID;
         )
         public ResponseEntity<?> createPayment(@Valid @RequestPart("paymentDto") PaymentRequestDto paymentDto,
                                                @RequestParam("file") MultipartFile file) {
-            String filename =imageService.uploadFile(file);
+            String filename = imageService.uploadFile(file);
             PaymentResponseDto responseDto = paymentService.createPayment(paymentDto, filename);
 
             return ResponseEntity.ok(Map.of("response", responseDto));

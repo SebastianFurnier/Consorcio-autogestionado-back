@@ -42,7 +42,7 @@ public class BalanceService {
                 partners.forEach((partner) -> {
                         Long partnerId = partner.getId();
 
-                        float partnerPayedAmount = (float) debtRepository.findByPaidIsTrueConsorcio_idAndPartner_id(consorcioId, partnerId)
+                        float partnerPayedAmount = (float) debtRepository.findByPaidIsTrueAndConsorcio_idAndPartner_id(consorcioId, partnerId)
                         .stream()
                         .mapToDouble(Debt::getAmount)
                         .sum();
