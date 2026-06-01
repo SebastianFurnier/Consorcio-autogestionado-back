@@ -104,20 +104,21 @@ public class PartnerService {
 
     public PartnerResponseDto getPartnerById(Long PartnerId) {
         Partner partner = repository.findByIdAndActiveIsTrue(PartnerId)
-        .orElseThrow(() -> new InvalidPartnerIDException("El id no esta asociado a ningun socio"));
-        
+                .orElseThrow(() -> new InvalidPartnerIDException("El id no esta asociado a ningun socio"));
+
         return convertToDto(partner);
     }
 
     public void editPartner(PartnerEditRequestDTO partnerDto, Authentication authentication) {
         Long requestUserId = (Long) authentication.getPrincipal();
-        Partner requestPartner = repository.findByIdAndActiveIsTrue(requestUserId).
-                orElseThrow(() -> new InvalidDataPartnerException("El id no esta asociado a ningun socio"));
-
         Partner partner = repository.findByIdAndActiveIsTrue(partnerDto.getId())
                 .orElseThrow(() -> new InvalidPartnerIDException("El id no esta asociado a ningun socio"));
 
         Consorcio consorcio = partner.getConsorcio();
+
+        Partner requestPartner = repository
+                .findByUserIdAndConsorcioIdAndActiveIsTrue(requestUserId, consorcio.getId())
+                .orElseThrow(() -> new InvalidDataPartnerException("No perteneces a este consorcio"));
 
         partner.setApartment(partnerDto.getApartment());
 
