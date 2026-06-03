@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.tpgdb.Consorcio.Dto.Expense.ExpenseRequestDto;
 import com.tpgdb.Consorcio.Exception.InvalidConsorcioException;
 import lombok.RequiredArgsConstructor;
+import java.time.LocalDate;
 
 @Service
 @RequiredArgsConstructor
@@ -56,7 +57,8 @@ public class ExpenseService {
                 payment.setAmount(dto.getAmount() / debtors.size());
                 payment.setDescription(dto.getDescription());
                 payment.setPaymentMethod(Payment.PaymentMethod.OTHER);
-                payment.setPeriod(dto.getDate());
+                LocalDate period = dto.getDate().withDayOfMonth(1);
+                payment.setPeriod(period);
                 payment.setPartner(payer);
                 payment.setPaymentDate(dto.getDate());
                 payment.setConsorcioId(consorcio.getId());

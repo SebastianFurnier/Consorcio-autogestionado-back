@@ -37,9 +37,7 @@ import java.util.UUID;
             return ResponseEntity.ok(Map.of("response", responseDto));
         }
 
-    /**
-     * Listar todos los pagos (temporal, voy a agregar filtros)
-     */
+
     @GetMapping("/all")
     // Agregamos @RequestParam para capturar el ID que viene en la URL
     public ResponseEntity<Map<String, List<PaymentResponseDto>>> getAllPayments(

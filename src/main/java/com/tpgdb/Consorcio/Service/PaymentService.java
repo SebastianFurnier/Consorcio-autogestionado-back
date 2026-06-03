@@ -73,7 +73,7 @@ public class PaymentService {
     }
 
     public List<PaymentResponseDto> getPaymentsByConsorcioAndPeriod(Long consorcioId, String period) {
-        List<Payment> payments = paymentRepository.findByConsorcioIdAndPeriodGreaterThanEqual(consorcioId, LocalDate.parse(period));
+        List<Payment> payments = paymentRepository.findByConsorcioIdAndPeriod(consorcioId, LocalDate.parse(period));
         return payments.stream()
                 .map(this::convertToResponseDto)
                 .toList();

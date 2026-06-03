@@ -11,10 +11,10 @@ import java.util.List;
 @Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
-    // MÉTODO NUEVO: Filtra los pagos navegando desde Partner hacia su Consorcio
+    // Filtra los pagos navegando desde Partner hacia su Consorcio
     List<Payment> findByPartner_Consorcio_Id(Long consorcioId);
 
-    List<Payment> findByConsorcioIdAndPeriodGreaterThanEqual(Long consorcioId, LocalDate period);
+    List<Payment> findByConsorcioIdAndPeriod(Long consorcioId, LocalDate period);
 
     List<Payment> findByPartnerId(Long partnerId);
 
