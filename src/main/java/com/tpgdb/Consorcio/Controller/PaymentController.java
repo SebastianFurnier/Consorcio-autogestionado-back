@@ -32,13 +32,8 @@ public class PaymentController {
     public ResponseEntity<?> createPayment(@Valid @RequestPart("paymentDto") PaymentRequestDto paymentDto,
                                            @RequestPart("file") MultipartFile file) { 
         try {
-            // =================================================================
-            // DETONAMOS CLOUDINARY PARA SUBIR EN LOCAL SIN ERROR DE CUENTA
-            // =================================================================
-            // String filename = imageService.uploadFile(file);
-            
-            // Le mandamos una URL falsa fija. Si esto guarda, el código de pagos funciona de 10
-            String filename = "https://url-de-prueba-local.com/comprobante_mock.jpg";
+
+            String filename = imageService.uploadFile(file);
             
             PaymentResponseDto responseDto = paymentService.createPayment(paymentDto, filename);
 
