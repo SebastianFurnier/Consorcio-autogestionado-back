@@ -102,4 +102,21 @@ public class ExpenseService {
                                                         expense.isApproved());
                                 }).toList();
         }
+
+        public List<ExpenseResponseDto> getExpensesOfConsortiumAndDateBetween(Long consorcioId, LocalDate startDate, LocalDate endDate) {
+                List<Expense> expenses = expenseRepository.findByConsorcioIdAndDateBetween(consorcioId, startDate, endDate);
+                return expenses.stream()
+                                .map(expense -> {
+                                        Long partnerId = (expense.getPartner() != null) ? expense.getPartner().getId()
+                                                        : null;
+                                        return new ExpenseResponseDto(
+                                                        expense.getId(),
+                                                        expense.getDate(),
+                                                        expense.getDescription(),
+                                                        expense.getCategory(),
+                                                        partnerId,
+                                                        expense.getAmount(),
+                                                        expense.isApproved());
+                                }).toList();
+        }
 }

@@ -1,6 +1,7 @@
 package com.tpgdb.Consorcio.Repository;
 
 import java.util.List;
+import java.time.LocalDate;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,4 +13,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
         List<Expense> findByConsorcioId(Long consorcioId);
 
         List<Expense> findApprovedByConsorcioId(Long consorcioId);
+
+        List<Expense> findByConsorcioIdAndDateBetween(Long consorcioId, LocalDate startDate, LocalDate endDate);
 }

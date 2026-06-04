@@ -2,6 +2,7 @@ package com.tpgdb.Consorcio.Controller;
 
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDate;
 
 import com.tpgdb.Consorcio.Dto.Expense.ExpenseResponseDto;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +45,15 @@ public class ExpenseController {
                                                                              Authentication authentication) {
         List<ExpenseResponseDto> approvedExpenses = service.getApprovedExpensesOfConsortium(consorcioId);
         return ResponseEntity.ok(Map.of("response", approvedExpenses));
+    }
+
+    @GetMapping("/period")
+    public ResponseEntity<Map<String, List<ExpenseResponseDto>>> getExpensesByDateBetween(@RequestParam Long consorcioId, @RequestParam String paymentDate) {
+        LocalDate date = LocalDate.parse(paymentDate);
+        LocalDate startDate = date.withDayOfMonth(1);
+        LocalDate endDate = date.withDayOfMonth(date.lengthOfMonth());
+        List<ExpenseResponseDto> expenses = service.getExpensesOfConsortiumAndDateBetween(consorcioId, startDate, endDate);
+        return ResponseEntity.ok(Map.of("response", expenses));
     }
 
 }
