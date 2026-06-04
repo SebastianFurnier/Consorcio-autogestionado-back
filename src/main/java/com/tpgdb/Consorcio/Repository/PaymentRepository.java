@@ -15,6 +15,10 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     List<Payment> findByConsorcioIdAndPeriodGreaterThanEqual(Long consorcioId, LocalDate period);
 
+    List<Payment> findByConsorcioId(Long consorcioId);
+
+    List<Payment> findByConsorcioIdAndPeriodBetween(Long consorcioId, LocalDate start, LocalDate end);
+
     List<Payment> findByPartnerId(Long partnerId);
 
     boolean existsByPartnerAndPeriod(Partner partner, LocalDate period);

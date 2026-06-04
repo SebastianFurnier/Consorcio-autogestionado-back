@@ -46,4 +46,11 @@ public class ExpenseController {
         return ResponseEntity.ok(Map.of("response", approvedExpenses));
     }
 
+    @GetMapping("/period")
+    public ResponseEntity<Map<String, List<ExpenseResponseDto>>> getExpensesByPeriod(@RequestParam Long consorcioId,
+                                                                                     @RequestParam(name = "period") String period) {
+        List<ExpenseResponseDto> expenses = service.getExpensesByConsorcioAndPeriod(consorcioId, period);
+        return ResponseEntity.ok(Map.of("response", expenses));
+    }
+
 }

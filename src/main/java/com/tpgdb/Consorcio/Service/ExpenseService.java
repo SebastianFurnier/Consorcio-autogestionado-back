@@ -1,6 +1,8 @@
 package com.tpgdb.Consorcio.Service;
 
 import java.util.List;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import com.tpgdb.Consorcio.Dto.Expense.ExpenseResponseDto;
 import com.tpgdb.Consorcio.Dto.payment.PaymentRequestDto;
 import com.tpgdb.Consorcio.Exception.InvalidDataPartnerException;
@@ -56,12 +58,39 @@ public class ExpenseService {
                 payment.setAmount(dto.getAmount() / debtors.size());
                 payment.setDescription(dto.getDescription());
                 payment.setPaymentMethod(Payment.PaymentMethod.OTHER);
-                payment.setPeriod(dto.getDate());
+                // Normalize period to first day of month
+                if (dto.getDate() != null) {
+                    payment.setPeriod(YearMonth.from(dto.getDate()).atDay(1));
+                } else {
+                    payment.setPeriod(YearMonth.from(LocalDate.now()).atDay(1));
+                }
                 payment.setPartner(payer);
                 payment.setPaymentDate(dto.getDate());
                 payment.setConsorcioId(consorcio.getId());
 
                 paymentRepository.save(payment);
+        }
+
+        public List<ExpenseResponseDto> getExpensesByConsorcioAndPeriod(Long consorcioId, String period) {
+                LocalDate base = LocalDate.parse(period);
+                YearMonth ym = YearMonth.from(base);
+                LocalDate start = ym.atDay(1);
+                LocalDate end = ym.atEndOfMonth();
+
+                List<Expense> expenses = expenseRepository.findByConsorcioIdAndDateBetween(consorcioId, start, end);
+
+                return expenses.stream()
+                                .map(expense -> {
+                                        Long partnerId = (expense.getPartner() != null) ? expense.getPartner().getId() : null;
+                                        return new ExpenseResponseDto(
+                                                        expense.getId(),
+                                                        expense.getDate(),
+                                                        expense.getDescription(),
+                                                        expense.getCategory(),
+                                                        partnerId,
+                                                        expense.getAmount(),
+                                                        expense.isApproved());
+                                }).toList();
         }
 
         public List<ExpenseResponseDto> getAllExpensesOfConsortium(Long consorcioId) {

@@ -8,11 +8,11 @@ import com.tpgdb.Consorcio.Repository.DebtRepository;
 import com.tpgdb.Consorcio.Repository.PaymentRepository;
 import com.tpgdb.Consorcio.Repository.PartnerRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import jakarta.transaction.Transactional;
 import java.time.LocalDate;
+import java.time.YearMonth;
 
 @Service
 @RequiredArgsConstructor
@@ -27,13 +27,14 @@ public class PaymentService {
         Partner partner = partnerRepository.findById(paymentDto.getPartnerId())
                 .orElseThrow(() -> new RuntimeException("Socio no encontrado con ID: " + paymentDto.getPartnerId()));
 
-        Debt debt = debtRepository.findById(paymentDto.getExpenseId()).orElseThrow( () ->
-                new InvalidPartnerIDException("No se encontro el pago asociado")
-        );
+        // CORRECCIÓN: El campo 'getExpenseId' del DTO trae en realidad el ID de la Deuda (Debt) desde el Front
+        Debt debt = debtRepository.findById(paymentDto.getExpenseId())
+                .orElseThrow(() -> new RuntimeException("No se encontró la deuda asociada con ID: " + paymentDto.getExpenseId()));
 
         debt.setPaid(true);
         debtRepository.save(debt);
 
+        // Obtenemos el Gasto real asociado a esa Deuda para guardarlo en el Pago
         Expense expense = debt.getExpense();
         Consorcio consorcio = partner.getConsorcio();
 
@@ -41,7 +42,14 @@ public class PaymentService {
         payment.setPartner(partner);
         payment.setExpense(expense);
         payment.setPaymentDate(paymentDto.getPaymentDate());
-        payment.setPeriod(paymentDto.getPeriod());
+        
+        // Normalize period to the first day of the month (YearMonth) to ensure consistent periods
+        if (paymentDto.getPeriod() != null) {
+            payment.setPeriod(YearMonth.from(paymentDto.getPeriod()).atDay(1));
+        } else {
+            payment.setPeriod(YearMonth.from(paymentDto.getPaymentDate()).atDay(1));
+        }
+        
         payment.setPaymentMethod(paymentDto.getPaymentMethod());
         payment.setDescription(paymentDto.getDescription());
         payment.setAmount(debt.getAmount());
@@ -54,11 +62,8 @@ public class PaymentService {
 
     /**
      * Obtiene todos los pagos filtrados por el ID del consorcio.
-     * Este es el método que soluciona la duplicidad de datos en el Dashboard.
      */
     public List<PaymentResponseDto> getAllPaymentsByConsorcio(Long consorcioId) {
-        // El repositorio debe tener definido findByPartner_Consorcio_Id
-
         List<Payment> payments = paymentRepository.findByPartner_Consorcio_Id(consorcioId);
         return payments.stream()
                 .map(this::convertToResponseDto)
@@ -73,7 +78,11 @@ public class PaymentService {
     }
 
     public List<PaymentResponseDto> getPaymentsByConsorcioAndPeriod(Long consorcioId, String period) {
-        List<Payment> payments = paymentRepository.findByConsorcioIdAndPeriodGreaterThanEqual(consorcioId, LocalDate.parse(period));
+        LocalDate base = LocalDate.parse(period);
+        YearMonth ym = YearMonth.from(base);
+        LocalDate start = ym.atDay(1);
+        LocalDate end = ym.atEndOfMonth();
+        List<Payment> payments = paymentRepository.findByConsorcioIdAndPeriodBetween(consorcioId, start, end);
         return payments.stream()
                 .map(this::convertToResponseDto)
                 .toList();
@@ -83,13 +92,13 @@ public class PaymentService {
         return new PaymentResponseDto(
                 payment.getId(),
                 payment.getPartner().getId(),
-                payment.getExpense().getId(),
+                payment.getExpense() != null ? payment.getExpense().getId() : null,
                 payment.getPaymentDate(),
                 payment.getPeriod(),
                 payment.getPaymentMethod(),
                 payment.getDescription(),
                 payment.getAmount(),
                 payment.getReceiptUrl()
-                );
+        );
     }
 }

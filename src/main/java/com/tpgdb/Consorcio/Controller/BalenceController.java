@@ -25,7 +25,8 @@ public class BalenceController {
         private final BalanceService service;
 
         @GetMapping()
-        public ResponseEntity<BalanceResponseDto> getBalance(@RequestParam Long consorcioId) {
-                return ResponseEntity.ok(service.getBalanceOfConsorcio(consorcioId));
+        public ResponseEntity<BalanceResponseDto> getBalance(@RequestParam Long consorcioId,
+                                                                                                                  @RequestParam(name = "period", required = false) String period) {
+                                return ResponseEntity.ok(service.getBalanceOfConsorcio(consorcioId, period));
         }
 }

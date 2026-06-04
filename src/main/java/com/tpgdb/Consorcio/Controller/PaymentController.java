@@ -12,43 +12,61 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/payment")
-    public class PaymentController {
-        private final PaymentService paymentService;
-        private final DebtService debtService;
-        private final UploadImageService imageService;
+public class PaymentController {
 
-        @PostMapping(
-                value = "/save",
-                consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-        )
-        public ResponseEntity<?> createPayment(@Valid @RequestPart("paymentDto") PaymentRequestDto paymentDto,
-                                               @RequestParam("file") MultipartFile file) {
-            String filename = imageService.uploadFile(file);
+    private final PaymentService paymentService;
+    private final DebtService debtService;
+    private final UploadImageService imageService;
+    private final com.tpgdb.Consorcio.Service.DashboardService dashboardService;
+
+    @PostMapping(
+            value = "/save",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public ResponseEntity<?> createPayment(@Valid @RequestPart("paymentDto") PaymentRequestDto paymentDto,
+                                           @RequestPart("file") MultipartFile file) { 
+        try {
+            // =================================================================
+            // DETONAMOS CLOUDINARY PARA SUBIR EN LOCAL SIN ERROR DE CUENTA
+            // =================================================================
+            // String filename = imageService.uploadFile(file);
+            
+            // Le mandamos una URL falsa fija. Si esto guarda, el código de pagos funciona de 10
+            String filename = "https://url-de-prueba-local.com/comprobante_mock.jpg";
+            
             PaymentResponseDto responseDto = paymentService.createPayment(paymentDto, filename);
 
             return ResponseEntity.ok(Map.of("response", responseDto));
+            
+        } catch (Exception e) {
+            e.printStackTrace(); 
+            
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "Error interno en el servidor",
+                "message", e.getMessage()
+            ));
         }
+    }
 
     /**
-     * Listar todos los pagos (temporal, voy a agregar filtros)
+     * Listar todos los pagos filtrados por consorcio
      */
     @GetMapping("/all")
-    // Agregamos @RequestParam para capturar el ID que viene en la URL
     public ResponseEntity<Map<String, List<PaymentResponseDto>>> getAllPayments(
             @RequestParam(name = "consorcioId") Long consorcioId) {
-        // Pasamos el ID al service
         List<PaymentResponseDto> payments = paymentService.getAllPaymentsByConsorcio(consorcioId);
         return ResponseEntity.ok(Map.of("response", payments));
     }
 
+    /**
+     * Listar pagos por consorcio y período
+     */
     @GetMapping("/period")
     public ResponseEntity<Map<String, List<PaymentResponseDto>>> getPaymentsByPeriod(
             @RequestParam(name = "consorcioId") Long consorcioId,
@@ -57,10 +75,15 @@ import java.util.UUID;
         return ResponseEntity.ok(Map.of("response", payments));
     }
 
+    /**
+     * Obtener cantidad de socios al día
+     */
     @GetMapping("socios-al-dia")
-    public ResponseEntity<Map<String, Integer>> getSociosAlDia(@RequestParam(name = "consorcioId") Long consorcioId) {
-        Integer amountDebtors = debtService.getSociosAlDia(consorcioId);
-
-        return ResponseEntity.ok(Map.of("amount", amountDebtors));
+    public ResponseEntity<Map<String, Integer>> getSociosAlDia(
+            @RequestParam(name = "consorcioId") Long consorcioId,
+            @RequestParam(name = "period", required = false) String period) {
+        var dashboard = dashboardService.getDashboardSummary(consorcioId, period);
+        int amountUpToDate = dashboard.getTotalSocios() - dashboard.getSociosConDeudaVencida();
+        return ResponseEntity.ok(Map.of("amount", amountUpToDate));
     }
 }

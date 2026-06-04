@@ -16,6 +16,7 @@ import java.util.List;
 public class DebtService {
     private final DebtRepository debtRepository;
     private final PartnerRepository partnerRepository;
+    private final DebtStatusCalculator debtStatusCalculator;
 
     public List<DebtResponseDto> getDebtFromPartnerAndConsorcio(Long consorcioId, Long partnerId) {
         List<Debt> debtList = debtRepository.findByPaidIsFalseAndConsorcio_idAndPartner_id(
@@ -26,6 +27,10 @@ public class DebtService {
                     DebtResponseDto debtResponseDto = new DebtResponseDto();
                     debtResponseDto.setAmount(debt.getAmount());
                     debtResponseDto.setId(debt.getId());
+                    debtResponseDto.setDueDate(debtStatusCalculator.getDueDate(debt));
+                    debtResponseDto.setStatus(debtStatusCalculator.getStatus(debt));
+                    debtResponseDto.setDaysOverdue(debtStatusCalculator.getDaysOverdue(debt));
+                    debtResponseDto.setDaysInMorosity(debtStatusCalculator.getDaysInMorosity(debt));
 
                     Expense expense = debt.getExpense();
                     debtResponseDto.setDescription(expense.getDescription());
