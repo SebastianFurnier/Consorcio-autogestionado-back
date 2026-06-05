@@ -14,11 +14,39 @@ import lombok.Setter;
 public class BalanceResponseDto {
         private float totalPayments;
         private float totalExpenses;
+        private float diferencia;
+        private float totalMora;
+        private float totalOverdueDebt;
+        private float totalMoroseDebt;
+        private float totalAccruedInterest;
+        private int countExpenses;
+        private int countPayments;
+        private int countDebtsPending;
+        private int countOverdueDebts;
+        private int countMoroseDebts;
+        private int countPartnersWithDebt;
+        private int countPartnersWithOverdueDebt;
+        private int countPartnersInMorosity;
+        private float morosityRate;
         private List<PartnerBalance> perPartnerBalance;
-        
+
         public BalanceResponseDto(float totalExpenses) {
                 this.totalExpenses = totalExpenses;
-                totalPayments = 0;
+                this.totalPayments = 0;
+                this.diferencia = 0;
+                this.totalMora = 0.0f;
+                this.totalOverdueDebt = 0.0f;
+                this.totalMoroseDebt = 0.0f;
+                this.totalAccruedInterest = 0.0f;
+                this.countExpenses = 0;
+                this.countPayments = 0;
+                this.countDebtsPending = 0;
+                this.countOverdueDebts = 0;
+                this.countMoroseDebts = 0;
+                this.countPartnersWithDebt = 0;
+                this.countPartnersWithOverdueDebt = 0;
+                this.countPartnersInMorosity = 0;
+                this.morosityRate = 0.0f;
         }
 
         public void addPayment(float amount) {

@@ -55,8 +55,8 @@ public class SecurityConfig {
 
         config.setAllowedOrigins(List.of(
                 "http://localhost:5174",
-                "https://consorcio-autogestionado.vercel.app"
-        ));
+                "https://consorcio-autogestionado.vercel.app",
+                "http://localhost:5173"));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 
@@ -65,8 +65,7 @@ public class SecurityConfig {
                 "Content-Type",
                 "Cache-Control",
                 "X-Requested-With",
-                "Accept"
-        ));
+                "Accept"));
 
         config.setExposedHeaders(List.of("Authorization"));
 
