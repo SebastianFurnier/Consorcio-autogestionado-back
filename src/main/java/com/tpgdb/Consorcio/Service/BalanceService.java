@@ -31,6 +31,7 @@ public class BalanceService {
         private final ExpenseRepository expenseRepository;
         private final PaymentRepository paymentRepository;
         private final DebtStatusCalculator debtStatusCalculator;
+        private final LateFeeCalculatorService lateFeeCalculatorService;
 
         public BalanceResponseDto getBalanceOfConsorcio(Long consorcioId) {
                 return getBalanceOfConsorcio(consorcioId, null);
@@ -49,6 +50,10 @@ public class BalanceService {
                         start = null;
                         end = null;
                 }
+
+                // Cargar configuración de mora
+                com.tpgdb.Consorcio.Model.ConsorcioSettings settings = lateFeeCalculatorService.getOrDefaultSettings(consorcioId);
+                int gracePeriodDays = settings.getGracePeriodDays();
 
                 // Expenses (total + count)
                 float totalExpenses;
@@ -83,19 +88,25 @@ public class BalanceService {
                 }
                 int countDebtsPending = (int) debtsInRange.stream().filter(d -> !d.isPaid()).count();
                 int countOverdueDebts = (int) debtsInRange.stream()
-                                .filter(debt -> debtStatusCalculator.getStatus(debt) == DebtStatus.VENCIDA)
+                                .filter(debt -> debtStatusCalculator.getStatus(debt, LocalDate.now(), gracePeriodDays) == DebtStatus.VENCIDA)
                                 .count();
                 int countMoroseDebts = (int) debtsInRange.stream()
-                                .filter(debt -> debtStatusCalculator.getStatus(debt) == DebtStatus.EN_MORA)
+                                .filter(debt -> debtStatusCalculator.getStatus(debt, LocalDate.now(), gracePeriodDays) == DebtStatus.EN_MORA)
                                 .count();
                 float totalOverdueDebt = (float) debtsInRange.stream()
-                                .filter(debt -> debtStatusCalculator.getStatus(debt) == DebtStatus.VENCIDA
-                                                || debtStatusCalculator.getStatus(debt) == DebtStatus.EN_MORA)
+                                .filter(debt -> {
+                                        DebtStatus status = debtStatusCalculator.getStatus(debt, LocalDate.now(), gracePeriodDays);
+                                        return status == DebtStatus.VENCIDA || status == DebtStatus.EN_MORA;
+                                })
                                 .mapToDouble(Debt::getAmount)
                                 .sum();
                 float totalMoroseDebt = (float) debtsInRange.stream()
-                                .filter(debt -> debtStatusCalculator.getStatus(debt) == DebtStatus.EN_MORA)
+                                .filter(debt -> debtStatusCalculator.getStatus(debt, LocalDate.now(), gracePeriodDays) == DebtStatus.EN_MORA)
                                 .mapToDouble(Debt::getAmount)
+                                .sum();
+                float totalAccruedInterest = (float) debtsInRange.stream()
+                                .filter(debt -> !debt.isPaid())
+                                .mapToDouble(debt -> lateFeeCalculatorService.calculateAccruedInterest(debt, settings))
                                 .sum();
 
                 BalanceResponseDto response = new BalanceResponseDto(totalExpenses);
@@ -107,6 +118,7 @@ public class BalanceService {
                 response.setTotalMora(totalMoroseDebt);
                 response.setTotalOverdueDebt(totalOverdueDebt);
                 response.setTotalMoroseDebt(totalMoroseDebt);
+                response.setTotalAccruedInterest(totalAccruedInterest);
                 response.setCountOverdueDebts(countOverdueDebts);
                 response.setCountMoroseDebts(countMoroseDebts);
 
@@ -142,21 +154,28 @@ public class BalanceService {
                                         .mapToDouble(Debt::getAmount)
                                         .sum();
                         float overdueDebt = (float) partnerDebts.stream()
-                                        .filter(debt -> debtStatusCalculator.getStatus(debt) == DebtStatus.VENCIDA
-                                                        || debtStatusCalculator.getStatus(debt) == DebtStatus.EN_MORA)
+                                        .filter(debt -> {
+                                                DebtStatus status = debtStatusCalculator.getStatus(debt, LocalDate.now(), gracePeriodDays);
+                                                return status == DebtStatus.VENCIDA || status == DebtStatus.EN_MORA;
+                                        })
                                         .mapToDouble(Debt::getAmount)
                                         .sum();
                         float moroseDebt = (float) partnerDebts.stream()
-                                        .filter(debt -> debtStatusCalculator.getStatus(debt) == DebtStatus.EN_MORA)
+                                        .filter(debt -> debtStatusCalculator.getStatus(debt, LocalDate.now(), gracePeriodDays) == DebtStatus.EN_MORA)
                                         .mapToDouble(Debt::getAmount)
                                         .sum();
                         int pendingDebts = (int) partnerDebts.stream().filter(debt -> !debt.isPaid()).count();
                         int overdueDebts = (int) partnerDebts.stream()
-                                        .filter(debt -> debtStatusCalculator.getStatus(debt) == DebtStatus.VENCIDA)
+                                        .filter(debt -> debtStatusCalculator.getStatus(debt, LocalDate.now(), gracePeriodDays) == DebtStatus.VENCIDA)
                                         .count();
                         int moroseDebts = (int) partnerDebts.stream()
-                                        .filter(debt -> debtStatusCalculator.getStatus(debt) == DebtStatus.EN_MORA)
+                                        .filter(debt -> debtStatusCalculator.getStatus(debt, LocalDate.now(), gracePeriodDays) == DebtStatus.EN_MORA)
                                         .count();
+
+                        float partnerAccumulatedInterest = (float) partnerDebts.stream()
+                                        .filter(debt -> !debt.isPaid())
+                                        .mapToDouble(debt -> lateFeeCalculatorService.calculateAccruedInterest(debt, settings))
+                                        .sum();
 
                         DebtStatus aggregateStatus = DebtStatus.PAGADA;
                         if (moroseDebts > 0) {
@@ -174,8 +193,10 @@ public class BalanceService {
                                         .min(LocalDate::compareTo)
                                         .orElse(null);
                         LocalDate oldestDueDate = partnerDebts.stream()
-                                        .filter(debt -> debtStatusCalculator.getStatus(debt) == DebtStatus.VENCIDA
-                                                        || debtStatusCalculator.getStatus(debt) == DebtStatus.EN_MORA)
+                                        .filter(debt -> {
+                                                DebtStatus status = debtStatusCalculator.getStatus(debt, LocalDate.now(), gracePeriodDays);
+                                                return status == DebtStatus.VENCIDA || status == DebtStatus.EN_MORA;
+                                        })
                                         .map(debtStatusCalculator::getDueDate)
                                         .filter(date -> date != null)
                                         .min(LocalDate::compareTo)
@@ -190,6 +211,9 @@ public class BalanceService {
                         partnerBalance.setDebtStatus(aggregateStatus);
                         partnerBalance.setNextDueDate(nextDueDate);
                         partnerBalance.setOldestDueDate(oldestDueDate);
+                        partnerBalance.setAccumulatedInterest(partnerAccumulatedInterest);
+                        partnerBalance.setPenaltyForLatePayment(partnerAccumulatedInterest);
+                        partnerBalance.setTotalOwedWithInterest(outstandingDebt + partnerAccumulatedInterest);
 
                         if (outstandingDebt > 0.01f) {
                                 countPartnersWithDebt++;

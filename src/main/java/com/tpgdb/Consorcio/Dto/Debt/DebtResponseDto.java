@@ -20,4 +20,9 @@ public class DebtResponseDto {
     private DebtStatus status;
     private long daysOverdue;
     private long daysInMorosity;
+    /** Interés acumulado por mora calculado dinámicamente (0 si no está en mora). */
+    private float interestAccrued;
+    /** Monto total a pagar: amount + interestAccrued */
+    private float totalOwed;
+    private Long expenseId;
 }

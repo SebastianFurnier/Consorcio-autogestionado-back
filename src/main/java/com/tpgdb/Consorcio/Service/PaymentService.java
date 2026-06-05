@@ -27,9 +27,9 @@ public class PaymentService {
         Partner partner = partnerRepository.findById(paymentDto.getPartnerId())
                 .orElseThrow(() -> new RuntimeException("Socio no encontrado con ID: " + paymentDto.getPartnerId()));
 
-        // CORRECCIÓN: El campo 'getExpenseId' del DTO trae en realidad el ID de la Deuda (Debt) desde el Front
-        Debt debt = debtRepository.findById(paymentDto.getExpenseId())
-                .orElseThrow(() -> new RuntimeException("No se encontró la deuda asociada con ID: " + paymentDto.getExpenseId()));
+        // CORRECCIÓN: El campo 'getDebtId' del DTO trae el ID de la Deuda (Debt) desde el Front
+        Debt debt = debtRepository.findById(paymentDto.getDebtId())
+                .orElseThrow(() -> new RuntimeException("No se encontró la deuda asociada con ID: " + paymentDto.getDebtId()));
 
         debt.setPaid(true);
         debtRepository.save(debt);

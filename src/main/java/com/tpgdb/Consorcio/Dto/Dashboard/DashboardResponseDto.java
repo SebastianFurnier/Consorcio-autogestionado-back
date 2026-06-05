@@ -25,6 +25,7 @@ public class DashboardResponseDto {
     private float deudaTotalVencida;
     private float deudaTotalEnMora;
     private float porcentajeSociosMorosos;
+    private float totalInterestAccrued;
     private List<PartnerResponseDto> socios;
     private List<ExpenseResponseDto> gastos;
     private List<PaymentResponseDto> pagos;

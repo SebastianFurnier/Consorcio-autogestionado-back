@@ -18,6 +18,7 @@ public class BalanceResponseDto {
         private float totalMora;
         private float totalOverdueDebt;
         private float totalMoroseDebt;
+        private float totalAccruedInterest;
         private int countExpenses;
         private int countPayments;
         private int countDebtsPending;
@@ -36,6 +37,7 @@ public class BalanceResponseDto {
                 this.totalMora = 0.0f;
                 this.totalOverdueDebt = 0.0f;
                 this.totalMoroseDebt = 0.0f;
+                this.totalAccruedInterest = 0.0f;
                 this.countExpenses = 0;
                 this.countPayments = 0;
                 this.countDebtsPending = 0;

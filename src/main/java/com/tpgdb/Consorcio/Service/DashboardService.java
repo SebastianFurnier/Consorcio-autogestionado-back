@@ -52,6 +52,7 @@ public class DashboardService {
                     balance.getTotalOverdueDebt(),
                     balance.getTotalMoroseDebt(),
                     balance.getMorosityRate(),
+                    balance.getTotalAccruedInterest(),
                     socios,
                     gastos,
                     pagos

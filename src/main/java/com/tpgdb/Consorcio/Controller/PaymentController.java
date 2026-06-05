@@ -34,7 +34,6 @@ public class PaymentController {
         try {
 
             String filename = imageService.uploadFile(file);
-            
             PaymentResponseDto responseDto = paymentService.createPayment(paymentDto, filename);
 
             return ResponseEntity.ok(Map.of("response", responseDto));
